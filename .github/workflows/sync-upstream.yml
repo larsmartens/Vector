@@ -127,8 +127,8 @@ jobs:
         run: |
           RELEASE_ZIP=$(find zygisk/release -type f -name 'Vector-v*-Release.zip' | head -1)
           RELEASE_BASENAME=$(basename "$RELEASE_ZIP")
-          VERSION=$(sed -n 's/.*"version": "\([^"]*\)".*/\1/p' zygisk/update.json | head -1)
-          VERSION_CODE=$(sed -n 's/.*"versionCode": \([0-9][0-9]*\).*/\1/p' zygisk/update.json | head -1)
+          VERSION=$(echo "$RELEASE_BASENAME" | sed -E 's/^Vector-(v[^-]+)-([0-9]+)-Release\\.zip$/\\1/')
+          VERSION_CODE=$(echo "$RELEASE_BASENAME" | sed -E 's/^Vector-(v[^-]+)-([0-9]+)-Release\\.zip$/\\2/')
           TAG_NAME="vector-${VERSION_CODE}"
           CHANGELOG_URL="https://raw.githubusercontent.com/larsmartens/Vector/master/zygisk/changelog.md"
           ZIP_URL="https://github.com/larsmartens/Vector/releases/download/${TAG_NAME}/${RELEASE_BASENAME}"
