@@ -17,6 +17,8 @@
 
 Vector is a Zygisk module providing an ART hooking framework that maintains API consistency with the original Xposed. It is engineered on top of [LSPlant](https://github.com/JingMatrix/LSPlant) to deliver a stable, native-level instrumentation environment.
 
+Fork-specific Android 16 boot isolation notes live in [docs/boot-debugging.md](docs/boot-debugging.md).
+
 The framework allows modules to modify system and application behavior in-memory. Because no APK files are modified, changes are non-destructive, easily reversible via reboot, and compatible across various ROMs and Android versions.
 
 ---
