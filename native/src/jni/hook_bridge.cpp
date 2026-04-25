@@ -3,6 +3,7 @@
 
 #include <lsplant.hpp>
 #include <memory>
+#include <mutex>
 #include <shared_mutex>
 
 #include "jni/jni_bridge.h"
@@ -25,6 +26,7 @@ struct HookItem {
     // std::greater<> ensures that higher priority numbers are processed first.
     std::multimap<jint, jobject, std::greater<>> legacy_callbacks;
     std::multimap<jint, jobject, std::greater<>> modern_callbacks;
+    mutable std::shared_mutex callbacks_mutex;
 
 private:
     // The backup is an atomic jobject.
@@ -151,9 +153,10 @@ VECTOR_DEF_NATIVE_METHOD(jboolean, HookBridge, hookMethod, jboolean useModernApi
     jobject backup = hook_item->GetBackup();
     if (!backup) return JNI_FALSE;
 
-    // Use an RAII monitor to lock the backup object,
-    // ensuring thread-safe modification of the callback lists.
-    lsplant::JNIMonitor monitor(env, backup);
+    // Do not synchronize on the reflected backup Method object here. ART/reflection may use that
+    // same monitor while invoking the original method, and system_server hooks can then deadlock
+    // against framework locks. Keep callback-list protection entirely native.
+    std::unique_lock callbacks_lock(hook_item->callbacks_mutex);
 
     // Store a global reference to the callback object itself.
     if (useModernApi) {
@@ -179,8 +182,7 @@ VECTOR_DEF_NATIVE_METHOD(jboolean, HookBridge, unhookMethod, jboolean useModernA
     jobject backup = hook_item->GetBackup();
     if (!backup) return JNI_FALSE;
 
-    // Lock to safely modify the callback list.
-    lsplant::JNIMonitor monitor(env, backup);
+    std::unique_lock callbacks_lock(hook_item->callbacks_mutex);
 
     // Select the correct multimap
     auto &callbacks = useModernApi ? hook_item->modern_callbacks : hook_item->legacy_callbacks;
@@ -517,8 +519,7 @@ VECTOR_DEF_NATIVE_METHOD(jobjectArray, HookBridge, callbackSnapshot, jclass call
     jobject backup = hook_item->GetBackup();
     if (!backup) return nullptr;
 
-    // Lock to ensure a consistent snapshot of the callback lists.
-    lsplant::JNIMonitor monitor(env, backup);
+    std::shared_lock callbacks_lock(hook_item->callbacks_mutex);
 
     // Get the generic Object class
     jclass obj_class = env->FindClass("java/lang/Object");
