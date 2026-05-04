@@ -37,6 +37,11 @@ jobs:
         run: |
           BEHIND=$(git rev-list HEAD..upstream/master --count)
           echo "behind=$BEHIND" >> "$GITHUB_OUTPUT"
+          if [ "$BEHIND" != "0" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          fi
           echo "Upstream is $BEHIND commit(s) ahead"
 
       - name: Capture fork baseline
@@ -91,43 +96,43 @@ jobs:
           fi
 
       - name: Setup Java
-        if: steps.check.outputs.behind != '0'
+        if: steps.check.outputs.should_release == 'true'
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
 
       - name: Setup Gradle
-        if: steps.check.outputs.behind != '0'
+        if: steps.check.outputs.should_release == 'true'
         uses: gradle/actions/setup-gradle@v5
 
       - name: Setup ninja
-        if: steps.check.outputs.behind != '0'
+        if: steps.check.outputs.should_release == 'true'
         uses: seanmiddleditch/gha-setup-ninja@v6
         with:
           version: 1.12.1
 
       - name: Setup Android SDK
-        if: steps.check.outputs.behind != '0'
+        if: steps.check.outputs.should_release == 'true'
         uses: android-actions/setup-android@v3
 
       - name: Initialize submodules
-        if: steps.check.outputs.behind != '0'
+        if: steps.check.outputs.should_release == 'true'
         run: git submodule update --init --recursive
 
       - name: Remove Android's cmake
-        if: steps.check.outputs.behind != '0'
+        if: steps.check.outputs.should_release == 'true'
         shell: bash
         run: rm -rf "$ANDROID_HOME/cmake"
 
       - name: Build with Gradle
-        if: steps.check.outputs.behind != '0'
+        if: steps.check.outputs.should_release == 'true'
         env:
           GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g
         run: ./gradlew --no-daemon --max-workers=2 zipAll
 
       - name: Update zygisk manifests
-        if: steps.check.outputs.behind != '0'
+        if: steps.check.outputs.should_release == 'true'
         id: manifest
         run: |
           RELEASE_ZIP=$(find zygisk/release -type f -name 'Vector-v*-Release.zip' | head -1)
@@ -153,7 +158,7 @@ jobs:
           echo "tag_name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
 
       - name: Commit updated manifests
-        if: steps.check.outputs.behind != '0'
+        if: steps.check.outputs.should_release == 'true'
         run: |
           git add zygisk/update.json magisk-loader/update/zygisk.json
           if ! git diff --cached --quiet; then
@@ -161,11 +166,11 @@ jobs:
           fi
 
       - name: Push synced branch
-        if: steps.check.outputs.behind != '0'
+        if: steps.check.outputs.should_release == 'true'
         run: git push origin master
 
       - name: Create release
-        if: steps.check.outputs.behind != '0'
+        if: steps.check.outputs.should_release == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.manifest.outputs.tag_name }}
