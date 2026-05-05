@@ -101,6 +101,8 @@ JingMatrix</string>
     <string name="disabled_verbose_log">详细日志已禁用</string>
     <!-- ModulesActivity -->
     <string name="module_empty_description">（未提供介绍）</string>
+    <string name="module_api_legacy">Legacy</string>
+    <string name="module_api_version">API %d</string>
     <string name="warning_xposed_min_version">此模块需要更新的 Xposed 版本（%d），因此无法激活</string>
     <string name="warning_target_version_higher">此模块是为较新的 Xposed 版本（%d）设计的，因此某些功能可能无法使用</string>
     <string name="no_min_version_specified">该模块未指定所需的 Xposed 版本</string>

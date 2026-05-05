@@ -97,6 +97,10 @@ public final class ModuleUtil {
         return result;
     }
 
+    private static int extractIntPart(String str, int fallback) {
+        return TextUtils.isEmpty(str) ? fallback : extractIntPart(str);
+    }
+
     public static ZipFile getModernModuleApk(ApplicationInfo info) {
         String[] apks;
         if (info.splitSourceDirs != null) {
@@ -297,8 +301,8 @@ public final class ModuleUtil {
                     if (propEntry != null) {
                         var prop = new Properties();
                         prop.load(modernModuleApk.getInputStream(propEntry));
-                        minVersion = extractIntPart(prop.getProperty("minApiVersion"));
-                        targetVersion = extractIntPart(prop.getProperty("targetApiVersion"));
+                        minVersion = extractIntPart(prop.getProperty("minApiVersion"), minVersion);
+                        targetVersion = extractIntPart(prop.getProperty("targetApiVersion"), targetVersion);
                         staticScope = TextUtils.equals(prop.getProperty("staticScope"), "true");
                     }
                     var scopeEntry = modernModuleApk.getEntry("META-INF/xposed/scope.list");
