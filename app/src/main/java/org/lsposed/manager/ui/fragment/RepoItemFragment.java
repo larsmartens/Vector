@@ -109,6 +109,8 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
     OnlineModule module;
     private ReleaseAdapter releaseAdapter;
     private InformationAdapter informationAdapter;
+    private boolean remoteModuleLoadRequested = false;
+    private boolean releaseLoadRequestedByUser = false;
 
     @Nullable
     @Override
@@ -147,6 +149,7 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
         releaseAdapter = new ReleaseAdapter();
         informationAdapter = new InformationAdapter();
         RepoLoader.getInstance().addListener(this);
+        loadRemoteModuleIfReadmeMissing();
         return binding.getRoot();
     }
 
@@ -248,6 +251,19 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
         return module;
     }
 
+    private boolean hasReadme(@Nullable OnlineModule module) {
+        return module != null && (!TextUtils.isEmpty(module.getReadmeHTML()) || !TextUtils.isEmpty(module.getReadme()));
+    }
+
+    private void loadRemoteModuleIfReadmeMissing() {
+        var currentModule = refreshModuleFromRepo();
+        if (currentModule == null || currentModule.getName() == null) return;
+        if (remoteModuleLoadRequested || currentModule.releasesLoaded || hasReadme(currentModule)) return;
+
+        remoteModuleLoadRequested = true;
+        RepoLoader.getInstance().loadRemoteReleases(currentModule.getName());
+    }
+
     @Nullable
     private String getModuleReadme() {
         var currentModule = refreshModuleFromRepo();
@@ -255,6 +271,9 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
         String readme = currentModule.getReadmeHTML();
         if (TextUtils.isEmpty(readme)) {
             readme = currentModule.getReadme();
+        }
+        if (TextUtils.isEmpty(readme)) {
+            loadRemoteModuleIfReadmeMissing();
         }
         return readme;
     }
@@ -284,6 +303,7 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
     @Override
     public void onRepoLoaded() {
         refreshModuleFromRepo();
+        loadRemoteModuleIfReadmeMissing();
         if (releaseAdapter != null) {
             runAsync(releaseAdapter::loadItems);
         }
@@ -297,9 +317,10 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
         if (releaseAdapter != null) {
             runAsync(releaseAdapter::loadItems);
         }
-        if ((repoLoader.getReleases(module.getName()) != null ? repoLoader.getReleases(module.getName()).size() : 1) == 1) {
+        if (releaseLoadRequestedByUser && (repoLoader.getReleases(module.getName()) != null ? repoLoader.getReleases(module.getName()).size() : 1) == 1) {
             showHint(R.string.module_release_no_more, true);
         }
+        releaseLoadRequestedByUser = false;
     }
 
     @Override
@@ -486,6 +507,7 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
                     if (holder.progress.getVisibility() == View.GONE) {
                         holder.title.setVisibility(View.GONE);
                         holder.progress.show();
+                        releaseLoadRequestedByUser = true;
                         RepoLoader.getInstance().loadRemoteReleases(module.getName());
                     }
                 });
