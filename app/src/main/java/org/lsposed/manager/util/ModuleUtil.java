@@ -58,7 +58,6 @@ public final class ModuleUtil {
     // xposedminversion below this
     public static int MIN_MODULE_VERSION = 2; // reject modules with
     private static final int DEFAULT_MODERN_API_VERSION = 100;
-    private static final int MODERN_TARGET_API_VERSION = 101;
     private static ModuleUtil instance = null;
     private final PackageManager pm;
     private final Set<ModuleListener> listeners = ConcurrentHashMap.newKeySet();
@@ -324,7 +323,8 @@ public final class ModuleUtil {
                     int parsedMinVersion = parsedLegacyMinVersion;
                     int parsedTargetVersion = parsedLegacyMinVersion;
                     var propEntry = moduleApk.getEntry("META-INF/xposed/module.prop");
-                    if (propEntry != null) {
+                    boolean hasModuleProp = propEntry != null;
+                    if (hasModuleProp) {
                         var prop = new Properties();
                         prop.load(moduleApk.getInputStream(propEntry));
                         parsedMinVersion = extractIntPart(prop.getProperty("minApiVersion"), parsedMinVersion);
@@ -335,7 +335,10 @@ public final class ModuleUtil {
                         parsedTargetVersion = DEFAULT_MODERN_API_VERSION;
                     }
 
-                    boolean isModernApiModule = hasModernEntry && parsedTargetVersion >= MODERN_TARGET_API_VERSION;
+                    // Modern API modules may explicitly target API 100. Do not classify them as
+                    // legacy simply because targetApiVersion is lower than 101.
+                    boolean isModernApiModule = hasModernEntry &&
+                            (hasModuleProp || (!hasLegacyEntry && !hasLegacyMetadata));
                     legacy = !isModernApiModule && (hasLegacyEntry || hasLegacyMetadata);
                     if (legacy) {
                         minVersion = parsedLegacyMinVersion != 0 ? parsedLegacyMinVersion : parsedMinVersion;
