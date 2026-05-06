@@ -58,6 +58,7 @@ public final class ModuleUtil {
     // xposedminversion below this
     public static int MIN_MODULE_VERSION = 2; // reject modules with
     private static final int MIN_API_MODULE_VERSION = 100;
+    private static final int MODERN_API_VERSION = 101;
     private static ModuleUtil instance = null;
     private final PackageManager pm;
     private final Set<ModuleListener> listeners = ConcurrentHashMap.newKeySet();
@@ -318,6 +319,7 @@ public final class ModuleUtil {
                 try (moduleApk) {
                     boolean hasModernEntry = hasModernInitEntry(moduleApk);
                     boolean hasLegacyEntry = hasLegacyInitEntry(moduleApk);
+                    boolean hasLegacyEvidence = hasLegacyEntry || isLegacyModule(app);
 
                     int parsedMinVersion = 0;
                     int parsedTargetVersion = 0;
@@ -331,12 +333,16 @@ public final class ModuleUtil {
                     }
 
                     // targetApiVersion defines the modern API generation shown in the tag.
-                    // minApiVersion is only used as a fallback when targetApiVersion is absent.
+                    // API 100 hybrid modules are shown as legacy because Vector does not support
+                    // API 100 but can still use their legacy entrypoint.
                     int displayApiVersion = parsedTargetVersion >= MIN_API_MODULE_VERSION
                             ? parsedTargetVersion
                             : parsedMinVersion;
-                    boolean isApiModule = hasModernEntry && displayApiVersion >= MIN_API_MODULE_VERSION;
-                    if (isApiModule) {
+                    boolean isModernApiModule = hasModernEntry && displayApiVersion >= MODERN_API_VERSION;
+                    boolean isApi100OnlyModule = hasModernEntry &&
+                            displayApiVersion == MIN_API_MODULE_VERSION &&
+                            !hasLegacyEvidence;
+                    if (isModernApiModule || isApi100OnlyModule) {
                         legacy = false;
                         minVersion = parsedMinVersion;
                         targetVersion = displayApiVersion;
@@ -349,7 +355,7 @@ public final class ModuleUtil {
                         } else {
                             scopeList = Collections.emptyList();
                         }
-                    } else if (hasLegacyEntry || isLegacyModule(app)) {
+                    } else if (hasLegacyEvidence) {
                         legacy = true;
                         minVersion = parsedLegacyMinVersion != 0 ? parsedLegacyMinVersion : parsedMinVersion;
                         targetVersion = minVersion;
