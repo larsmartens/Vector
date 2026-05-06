@@ -326,17 +326,20 @@ public final class ModuleUtil {
                         var prop = new Properties();
                         prop.load(moduleApk.getInputStream(propEntry));
                         parsedMinVersion = extractIntPart(prop.getProperty("minApiVersion"), 0);
-                        parsedTargetVersion = extractIntPart(prop.getProperty("targetApiVersion"), parsedMinVersion);
+                        parsedTargetVersion = extractIntPart(prop.getProperty("targetApiVersion"), 0);
                         staticScope = TextUtils.equals(prop.getProperty("staticScope"), "true");
                     }
 
-                    // minApiVersion defines the incompatible modern API generation in Vector.
-                    // API 101 and API 100 must not be collapsed into the same category.
-                    boolean isApiModule = hasModernEntry && parsedMinVersion >= MIN_API_MODULE_VERSION;
+                    // targetApiVersion defines the modern API generation shown in the tag.
+                    // minApiVersion is only used as a fallback when targetApiVersion is absent.
+                    int displayApiVersion = parsedTargetVersion >= MIN_API_MODULE_VERSION
+                            ? parsedTargetVersion
+                            : parsedMinVersion;
+                    boolean isApiModule = hasModernEntry && displayApiVersion >= MIN_API_MODULE_VERSION;
                     if (isApiModule) {
                         legacy = false;
                         minVersion = parsedMinVersion;
-                        targetVersion = parsedMinVersion;
+                        targetVersion = displayApiVersion;
 
                         var scopeEntry = moduleApk.getEntry("META-INF/xposed/scope.list");
                         if (scopeEntry != null) {
@@ -348,7 +351,7 @@ public final class ModuleUtil {
                         }
                     } else if (hasLegacyEntry || isLegacyModule(app)) {
                         legacy = true;
-                        minVersion = parsedLegacyMinVersion != 0 ? parsedLegacyMinVersion : parsedTargetVersion;
+                        minVersion = parsedLegacyMinVersion != 0 ? parsedLegacyMinVersion : parsedMinVersion;
                         targetVersion = minVersion;
                         staticScope = false;
                     } else {
