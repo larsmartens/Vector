@@ -57,7 +57,7 @@ import java.util.zip.ZipFile;
 public final class ModuleUtil {
     // xposedminversion below this
     public static int MIN_MODULE_VERSION = 2; // reject modules with
-    private static final int DEFAULT_MODERN_API_VERSION = 100;
+    private static final int MIN_API_MODULE_VERSION = 100;
     private static ModuleUtil instance = null;
     private final PackageManager pm;
     private final Set<ModuleListener> listeners = ConcurrentHashMap.newKeySet();
@@ -309,44 +309,34 @@ public final class ModuleUtil {
             updateTime = pkg.lastUpdateTime;
 
             int parsedLegacyMinVersion = readLegacyMinVersion(app);
-            boolean legacy = true;
-            int minVersion = parsedLegacyMinVersion;
-            int targetVersion = parsedLegacyMinVersion;
+            boolean legacy = isLegacyModule(app);
+            int minVersion = legacy ? parsedLegacyMinVersion : 0;
+            int targetVersion = legacy ? parsedLegacyMinVersion : 0;
             boolean staticScope = false;
 
             if (moduleApk != null) {
                 try (moduleApk) {
                     boolean hasModernEntry = hasModernInitEntry(moduleApk);
                     boolean hasLegacyEntry = hasLegacyInitEntry(moduleApk);
-                    boolean hasLegacyMetadata = isLegacyModule(app);
 
-                    int parsedMinVersion = parsedLegacyMinVersion;
-                    int parsedTargetVersion = parsedLegacyMinVersion;
+                    int parsedMinVersion = 0;
+                    int parsedTargetVersion = 0;
                     var propEntry = moduleApk.getEntry("META-INF/xposed/module.prop");
-                    boolean hasModuleProp = propEntry != null;
-                    if (hasModuleProp) {
+                    if (propEntry != null) {
                         var prop = new Properties();
                         prop.load(moduleApk.getInputStream(propEntry));
-                        parsedMinVersion = extractIntPart(prop.getProperty("minApiVersion"), parsedMinVersion);
-                        parsedTargetVersion = extractIntPart(prop.getProperty("targetApiVersion"), parsedTargetVersion);
+                        parsedMinVersion = extractIntPart(prop.getProperty("minApiVersion"), 0);
+                        parsedTargetVersion = extractIntPart(prop.getProperty("targetApiVersion"), parsedMinVersion);
                         staticScope = TextUtils.equals(prop.getProperty("staticScope"), "true");
-                    } else if (hasModernEntry && !hasLegacyEntry && !hasLegacyMetadata) {
-                        parsedMinVersion = DEFAULT_MODERN_API_VERSION;
-                        parsedTargetVersion = DEFAULT_MODERN_API_VERSION;
                     }
 
-                    // Modern API modules may explicitly target API 100. Do not classify them as
-                    // legacy simply because targetApiVersion is lower than 101.
-                    boolean isModernApiModule = hasModernEntry &&
-                            (hasModuleProp || (!hasLegacyEntry && !hasLegacyMetadata));
-                    legacy = !isModernApiModule && (hasLegacyEntry || hasLegacyMetadata);
-                    if (legacy) {
-                        minVersion = parsedLegacyMinVersion != 0 ? parsedLegacyMinVersion : parsedMinVersion;
-                        targetVersion = minVersion;
-                        staticScope = false;
-                    } else {
-                        minVersion = parsedMinVersion != 0 ? parsedMinVersion : DEFAULT_MODERN_API_VERSION;
-                        targetVersion = parsedTargetVersion != 0 ? parsedTargetVersion : minVersion;
+                    // minApiVersion defines the incompatible modern API generation in Vector.
+                    // API 101 and API 100 must not be collapsed into the same category.
+                    boolean isApiModule = hasModernEntry && parsedMinVersion >= MIN_API_MODULE_VERSION;
+                    if (isApiModule) {
+                        legacy = false;
+                        minVersion = parsedMinVersion;
+                        targetVersion = parsedMinVersion;
 
                         var scopeEntry = moduleApk.getEntry("META-INF/xposed/scope.list");
                         if (scopeEntry != null) {
@@ -356,6 +346,17 @@ public final class ModuleUtil {
                         } else {
                             scopeList = Collections.emptyList();
                         }
+                    } else if (hasLegacyEntry || isLegacyModule(app)) {
+                        legacy = true;
+                        minVersion = parsedLegacyMinVersion != 0 ? parsedLegacyMinVersion : parsedTargetVersion;
+                        targetVersion = minVersion;
+                        staticScope = false;
+                    } else {
+                        legacy = false;
+                        minVersion = 0;
+                        targetVersion = 0;
+                        staticScope = false;
+                        scopeList = Collections.emptyList();
                     }
                 } catch (IOException | OutOfMemoryError e) {
                     Log.e(App.TAG, "Error while parsing module APK", e);
