@@ -184,7 +184,7 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
             } else {
                 direction = "ltr";
             }
-            if (text == null) {
+            if (TextUtils.isEmpty(text)) {
                 text = "<center>" + App.getInstance().getString(R.string.list_empty) + "</center>";
             }
             if (ResourceUtils.isNightMode(getResources().getConfiguration())) {
@@ -238,6 +238,27 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
         }
     }
 
+    @Nullable
+    private OnlineModule refreshModuleFromRepo() {
+        if (module == null || module.getName() == null) return module;
+        var updatedModule = RepoLoader.getInstance().getOnlineModule(module.getName());
+        if (updatedModule != null) {
+            module = updatedModule;
+        }
+        return module;
+    }
+
+    @Nullable
+    private String getModuleReadme() {
+        var currentModule = refreshModuleFromRepo();
+        if (currentModule == null) return null;
+        String readme = currentModule.getReadmeHTML();
+        if (TextUtils.isEmpty(readme)) {
+            readme = currentModule.getReadme();
+        }
+        return readme;
+    }
+
     @Override
     public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
 
@@ -261,7 +282,16 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
     }
 
     @Override
+    public void onRepoLoaded() {
+        refreshModuleFromRepo();
+        if (releaseAdapter != null) {
+            runAsync(releaseAdapter::loadItems);
+        }
+    }
+
+    @Override
     public void onModuleReleasesLoaded(OnlineModule module) {
+        if (this.module == null || module == null || !TextUtils.equals(this.module.getName(), module.getName())) return;
         this.module = module;
         var repoLoader = RepoLoader.getInstance();
         if (releaseAdapter != null) {
@@ -611,8 +641,16 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
         }
     }
 
-    public static class ReadmeFragment extends BorderFragment {
+    public static class ReadmeFragment extends BorderFragment implements RepoLoader.RepoListener {
         ItemRepoReadmeBinding binding;
+
+        private void renderReadme() {
+            var parent = getParentFragment();
+            if (!(parent instanceof RepoItemFragment) || binding == null) return;
+
+            var repoItemFragment = (RepoItemFragment) parent;
+            repoItemFragment.renderGithubMarkdown(binding.readme, repoItemFragment.getModuleReadme());
+        }
 
         @Nullable
         @Override
@@ -624,11 +662,32 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
                 }
                 return null;
             }
-            var repoItemFragment = (RepoItemFragment) parent;
             binding = ItemRepoReadmeBinding.inflate(getLayoutInflater(), container, false);
-            repoItemFragment.renderGithubMarkdown(binding.readme, repoItemFragment.module.getReadmeHTML());
+            renderReadme();
             borderView = binding.scrollView;
+            RepoLoader.getInstance().addListener(this);
             return binding.getRoot();
+        }
+
+        @Override
+        public void onRepoLoaded() {
+            if (binding != null) {
+                runOnUiThread(this::renderReadme);
+            }
+        }
+
+        @Override
+        public void onModuleReleasesLoaded(OnlineModule module) {
+            if (binding != null) {
+                runOnUiThread(this::renderReadme);
+            }
+        }
+
+        @Override
+        public void onDestroyView() {
+            RepoLoader.getInstance().removeListener(this);
+            binding = null;
+            super.onDestroyView();
         }
 
         @Override
