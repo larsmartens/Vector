@@ -57,7 +57,7 @@ import java.util.zip.ZipFile;
 public final class ModuleUtil {
     // xposedminversion below this
     public static int MIN_MODULE_VERSION = 2; // reject modules with
-    private static final int MIN_API_MODULE_VERSION = 100;
+    public static final int MIN_OUTDATED_MODERN_MODULE_API = 100;
     private static final int MODERN_API_VERSION = 101;
     private static final String IGNORED_MODULE_UPDATES = "ignored_module_updates";
     private static ModuleUtil instance = null;
@@ -362,12 +362,12 @@ public final class ModuleUtil {
                     // targetApiVersion defines the modern API generation shown in the tag.
                     // API 100 hybrid modules are shown as legacy because Vector does not support
                     // API 100 but can still use their legacy entrypoint.
-                    int displayApiVersion = parsedTargetVersion >= MIN_API_MODULE_VERSION
+                    int displayApiVersion = parsedTargetVersion >= MIN_OUTDATED_MODERN_MODULE_API
                             ? parsedTargetVersion
                             : parsedMinVersion;
                     boolean isModernApiModule = hasModernEntry && displayApiVersion >= MODERN_API_VERSION;
                     boolean isApi100OnlyModule = hasModernEntry &&
-                            displayApiVersion == MIN_API_MODULE_VERSION &&
+                            displayApiVersion == MIN_OUTDATED_MODERN_MODULE_API &&
                             !hasLegacyEntry;
                     if (isModernApiModule || isApi100OnlyModule) {
                         legacy = false;
