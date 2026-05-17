@@ -319,7 +319,6 @@ public final class ModuleUtil {
                 try (moduleApk) {
                     boolean hasModernEntry = hasModernInitEntry(moduleApk);
                     boolean hasLegacyEntry = hasLegacyInitEntry(moduleApk);
-                    boolean hasLegacyEvidence = hasLegacyEntry || isLegacyModule(app);
 
                     int parsedMinVersion = 0;
                     int parsedTargetVersion = 0;
@@ -341,7 +340,7 @@ public final class ModuleUtil {
                     boolean isModernApiModule = hasModernEntry && displayApiVersion >= MODERN_API_VERSION;
                     boolean isApi100OnlyModule = hasModernEntry &&
                             displayApiVersion == MIN_API_MODULE_VERSION &&
-                            !hasLegacyEvidence;
+                            !hasLegacyEntry;
                     if (isModernApiModule || isApi100OnlyModule) {
                         legacy = false;
                         minVersion = parsedMinVersion;
@@ -355,7 +354,7 @@ public final class ModuleUtil {
                         } else {
                             scopeList = Collections.emptyList();
                         }
-                    } else if (hasLegacyEvidence) {
+                    } else if (hasLegacyEntry || (!hasModernEntry && isLegacyModule(app))) {
                         legacy = true;
                         minVersion = parsedLegacyMinVersion != 0 ? parsedLegacyMinVersion : parsedMinVersion;
                         targetVersion = minVersion;
