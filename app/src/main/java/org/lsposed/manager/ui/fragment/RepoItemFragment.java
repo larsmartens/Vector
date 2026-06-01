@@ -426,7 +426,22 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
             return new BlurBehindDialogBuilder(requireActivity(), R.style.ThemeOverlay_MaterialAlertDialog_Centered_FullWidthButtons)
                     .setTitle(R.string.module_release_view_assets)
                     .setPositiveButton(android.R.string.cancel, null)
-                    .setAdapter(new ArrayAdapter<>(requireActivity(), R.layout.dialog_item, args.getCharSequenceArray("names")),
+                    .setAdapter(new ArrayAdapter<CharSequence>(requireActivity(), R.layout.item_download_dialog, R.id.text, args.getCharSequenceArray("names")) {
+                        @NonNull
+                        @Override
+                        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                            View view = super.getView(position, convertView, parent);
+                            View shareButton = view.findViewById(R.id.share_button);
+                            shareButton.setOnClickListener(v -> {
+                                String url = args.getStringArrayList("urls").get(position);
+                                android.content.Intent shareIntent = new android.content.Intent(android.content.Intent.ACTION_SEND);
+                                shareIntent.setType("text/plain");
+                                shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, url);
+                                requireActivity().startActivity(android.content.Intent.createChooser(shareIntent, null));
+                            });
+                            return view;
+                        }
+                    },
                             (dialog, which) -> NavUtil.startURL(requireActivity(), args.getStringArrayList("urls").get(which)))
                     .create();
         }
