@@ -701,7 +701,13 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
         @Override
         public void onModuleReleasesLoaded(OnlineModule module) {
             if (binding != null) {
-                runOnUiThread(this::renderReadme);
+                var parent = getParentFragment();
+                if (parent instanceof RepoItemFragment) {
+                    var repoItemFragment = (RepoItemFragment) parent;
+                    if (repoItemFragment.module != null && TextUtils.equals(repoItemFragment.module.getName(), module.getName())) {
+                        runOnUiThread(this::renderReadme);
+                    }
+                }
             }
         }
 
