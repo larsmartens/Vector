@@ -29,13 +29,10 @@ import com.google.gson.JsonParser;
 
 import org.lsposed.manager.App;
 import org.lsposed.manager.BuildConfig;
-import org.lsposed.manager.ConfigManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.util.Locale;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -81,10 +78,9 @@ public class UpdateUtil {
     private static void checkAssets(JsonObject assets, String releaseNotes) {
         var pref = App.getPreferences();
         var name = assets.get("name").getAsString();
-        var splitName = name.split("-");
         pref.edit()
-                .putInt("latest_version", Integer.parseInt(splitName[2]))
-                .putLong("latest_check", Instant.now().getEpochSecond())
+                .putInt("latest_version_code", extractVersionCode(name))
+                .putLong("latest_check_time", Instant.now().getEpochSecond())
                 .putString("release_notes", releaseNotes)
                 .putString("zip_file", null)
                 .putBoolean("checked", true)
@@ -104,20 +100,22 @@ public class UpdateUtil {
         }
     }
 
+    private static int extractVersionCode(String name) {
+        var parts = name.split("-");
+        for (var part : parts) {
+            try {
+                return Integer.parseInt(part);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return 0;
+    }
+
     public static boolean needUpdate() {
         var pref = App.getPreferences();
         if (!pref.getBoolean("checked", false)) return false;
-        var now = Instant.now();
-        var buildTime = Instant.ofEpochSecond(BuildConfig.BUILD_TIME);
-        var check = pref.getLong("latest_check", 0);
-        if (check > 0) {
-            var checkTime = Instant.ofEpochSecond(check);
-            if (checkTime.atOffset(ZoneOffset.UTC).plusDays(30).toInstant().isBefore(now))
-                return true;
-            var code = pref.getInt("latest_version", 0);
-            return code > BuildConfig.VERSION_CODE;
-        }
-        return buildTime.atOffset(ZoneOffset.UTC).plusDays(30).toInstant().isBefore(now);
+        var code = pref.getInt("latest_version_code", 0);
+        return code > BuildConfig.VERSION_CODE;
     }
 
     @Nullable
