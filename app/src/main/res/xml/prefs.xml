@@ -128,6 +128,12 @@
             android:key="update_channel"
             android:summary="%s"
             android:title="@string/settings_update_channel" />
+
+        <Preference
+            android:icon="@drawable/ic_round_update_24"
+            android:key="ignored_module_updates"
+            android:summary="@string/settings_ignored_module_updates_summary"
+            android:title="@string/settings_ignored_module_updates" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_backup_and_restore">

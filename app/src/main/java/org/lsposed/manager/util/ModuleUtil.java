@@ -59,6 +59,7 @@ public final class ModuleUtil {
     public static int MIN_MODULE_VERSION = 2; // reject modules with
     private static final int MIN_API_MODULE_VERSION = 100;
     private static final int MODERN_API_VERSION = 101;
+    private static final String IGNORED_MODULE_UPDATES = "ignored_module_updates";
     private static ModuleUtil instance = null;
     private final PackageManager pm;
     private final Set<ModuleListener> listeners = ConcurrentHashMap.newKeySet();
@@ -85,6 +86,25 @@ public final class ModuleUtil {
             App.getExecutorService().submit(instance::reloadInstalledModules);
         }
         return instance;
+    }
+
+    @NonNull
+    public static Set<String> getIgnoredModuleUpdates() {
+        return new HashSet<>(App.getPreferences().getStringSet(IGNORED_MODULE_UPDATES, Collections.emptySet()));
+    }
+
+    public static boolean isUpdateIgnored(@NonNull String packageName) {
+        return getIgnoredModuleUpdates().contains(packageName);
+    }
+
+    public static void setUpdateIgnored(@NonNull String packageName, boolean ignored) {
+        var ignoredModules = getIgnoredModuleUpdates();
+        boolean changed = ignored ? ignoredModules.add(packageName) : ignoredModules.remove(packageName);
+        if (!changed) {
+            return;
+        }
+        App.getPreferences().edit().putStringSet(IGNORED_MODULE_UPDATES, ignoredModules).apply();
+        getInstance().listeners.forEach(listener -> listener.onModuleUpdateIgnoreChanged(packageName));
     }
 
     public static int extractIntPart(String str) {
@@ -273,6 +293,10 @@ public final class ModuleUtil {
         }
 
         default void onModulesReloaded() {
+
+        }
+
+        default void onModuleUpdateIgnoreChanged(String packageName) {
 
         }
     }

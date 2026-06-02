@@ -113,6 +113,11 @@
     <string name="module_uninstall">Uninstall</string>
     <string name="module_settings">Module settings</string>
     <string name="view_in_repo">View in Repo</string>
+    <string name="module_ignore_update">Ignore updates</string>
+    <string name="module_allow_update">Allow updates</string>
+    <string name="module_remove_from_ignored_updates">Remove from ignored updates</string>
+    <string name="module_update_ignored">Module updates ignored</string>
+    <string name="module_update_allowed">Module updates allowed</string>
     <string name="module_uninstall_message">Do you want to uninstall this module?</string>
     <string name="module_uninstalled">Uninstalled %1$s</string>
     <string name="module_uninstall_failed">Uninstall unsuccessful</string>
@@ -201,6 +206,9 @@
     <string name="settings_enable_status_notification">Status Notification</string>
     <string name="settings_enable_status_notification_summary">Show a notification that can open parasitic manager</string>
     <string name="settings_update_channel">Update channel</string>
+    <string name="settings_ignored_module_updates">Ignored module updates</string>
+    <string name="settings_ignored_module_updates_summary">Manage modules whose update notifications are hidden</string>
+    <string name="settings_no_ignored_module_updates">No ignored module updates</string>
     <string name="update_channel_stable">Stable</string>
     <string name="update_channel_bate">Beta</string>
     <string name="update_channel_nightly">Nightly build</string>
@@ -221,6 +229,7 @@
     <string name="repo_load_failed">Failed to load module repo: %s</string>
     <string name="sort_upgradable_first">Upgradable first</string>
     <string name="installed">Installed</string>
+    <string name="module_not_installed">Not installed</string>
     <plurals name="module_release_assets_download_count">
         <item quantity="one">%d download</item>
         <item quantity="other">%d downloads</item>

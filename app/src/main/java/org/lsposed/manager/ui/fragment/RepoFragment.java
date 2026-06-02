@@ -149,6 +149,10 @@ public class RepoFragment extends BaseFragment implements RepoLoader.RepoListene
         if (modules != null && repoLoader.isRepoLoaded()) {
             modules.forEach((k, v) -> {
                         if (!processedModules.contains(k.first)) {
+                            if (ModuleUtil.isUpdateIgnored(k.first)) {
+                                processedModules.add(k.first);
+                                return;
+                            }
                             var ver = repoLoader.getModuleLatestVersion(k.first);
                             if (ver != null && ver.upgradable(v.versionCode, v.versionName)) {
                                 ++count[0];
@@ -247,6 +251,14 @@ public class RepoFragment extends BaseFragment implements RepoLoader.RepoListene
     }
 
     @Override
+    public void onModuleUpdateIgnoreChanged(String packageName) {
+        if (adapter != null) {
+            adapter.refresh();
+        }
+        updateRepoSummary();
+    }
+
+    @Override
     public boolean onMenuItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.item_sort_by_name) {
@@ -287,6 +299,9 @@ public class RepoFragment extends BaseFragment implements RepoLoader.RepoListene
         }
 
         RepoLoader.ModuleVersion getUpgradableVer(OnlineModule module) {
+            if (ModuleUtil.isUpdateIgnored(module.getName())) {
+                return null;
+            }
             ModuleUtil.InstalledModule installedModule = moduleUtil.getModule(module.getName());
             if (installedModule != null) {
                 var ver = repoLoader.getModuleLatestVersion(installedModule.packageName);

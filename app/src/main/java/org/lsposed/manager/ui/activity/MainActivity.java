@@ -202,6 +202,10 @@ public class MainActivity extends BaseActivity implements RepoLoader.RepoListene
         if (modules == null) return;
         modules.forEach((k, v) -> {
                     if (!processedModules.contains(k.first)) {
+                        if (ModuleUtil.isUpdateIgnored(k.first)) {
+                            processedModules.add(k.first);
+                            return;
+                        }
                         var ver = repoLoader.getModuleLatestVersion(k.first);
                         if (ver != null && ver.upgradable(v.versionCode, v.versionName)) {
                             ++count[0];
@@ -237,6 +241,11 @@ public class MainActivity extends BaseActivity implements RepoLoader.RepoListene
     public void onModulesReloaded() {
         onRepoLoaded();
         setModulesSummary(moduleUtil.getEnabledModulesCount());
+    }
+
+    @Override
+    public void onModuleUpdateIgnoreChanged(String packageName) {
+        onRepoLoaded();
     }
 
     @Override

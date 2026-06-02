@@ -112,6 +112,11 @@ JingMatrix</string>
     <string name="module_uninstall">卸载</string>
     <string name="module_settings">模块设置</string>
     <string name="view_in_repo">在仓库中查看</string>
+    <string name="module_ignore_update">忽略更新</string>
+    <string name="module_allow_update">允许更新</string>
+    <string name="module_remove_from_ignored_updates">从忽略更新列表中移除</string>
+    <string name="module_update_ignored">已忽略模块更新</string>
+    <string name="module_update_allowed">已恢复模块更新提示</string>
     <string name="module_uninstall_message">确认卸载该模块？</string>
     <string name="module_uninstalled">已卸载 %1$s</string>
     <string name="module_uninstall_failed">卸载失败</string>
@@ -200,6 +205,9 @@ JingMatrix</string>
     <string name="settings_enable_status_notification">状态通知</string>
     <string name="settings_enable_status_notification_summary">显示一个通知以打开寄生管理器</string>
     <string name="settings_update_channel">模块更新通道</string>
+    <string name="settings_ignored_module_updates">已忽略的模块更新</string>
+    <string name="settings_ignored_module_updates_summary">管理已隐藏更新提示的模块</string>
+    <string name="settings_no_ignored_module_updates">没有已忽略更新的模块</string>
     <string name="update_channel_stable">稳定版</string>
     <string name="update_channel_bate">测试版</string>
     <string name="update_channel_nightly">每夜版</string>
@@ -217,6 +225,7 @@ JingMatrix</string>
     <string name="repo_load_failed">模块仓库加载失败：%s</string>
     <string name="sort_upgradable_first">可更新优先</string>
     <string name="installed">已安装</string>
+    <string name="module_not_installed">未安装</string>
     <plurals name="module_release_assets_download_count">
         <item quantity="other">%d 次下载</item>
     </plurals>

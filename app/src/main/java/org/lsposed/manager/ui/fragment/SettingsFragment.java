@@ -21,6 +21,8 @@ package org.lsposed.manager.ui.fragment;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -34,9 +36,11 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.text.HtmlCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.color.DynamicColors;
@@ -45,18 +49,23 @@ import org.lsposed.manager.App;
 import org.lsposed.manager.BuildConfig;
 import org.lsposed.manager.ConfigManager;
 import org.lsposed.manager.R;
+import org.lsposed.manager.databinding.DialogIgnoredModuleUpdatesBinding;
 import org.lsposed.manager.databinding.FragmentSettingsBinding;
+import org.lsposed.manager.databinding.ItemIgnoredModuleUpdateBinding;
 import org.lsposed.manager.repo.RepoLoader;
 import org.lsposed.manager.ui.activity.MainActivity;
+import org.lsposed.manager.ui.dialog.BlurBehindDialogBuilder;
 import org.lsposed.manager.util.BackupUtils;
 import org.lsposed.manager.util.CloudflareDNS;
 import org.lsposed.manager.util.LangList;
+import org.lsposed.manager.util.ModuleUtil;
 import org.lsposed.manager.util.NavUtil;
 import org.lsposed.manager.util.ShortcutUtil;
 import org.lsposed.manager.util.ThemeUtil;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 
 import rikka.core.util.ResourceUtils;
@@ -345,6 +354,127 @@ public class SettingsFragment extends BaseFragment {
                     repoLoader.updateLatestVersion(String.valueOf(newValue));
                     return true;
                 });
+            }
+            Preference ignoredModuleUpdates = findPreference("ignored_module_updates");
+            if (ignoredModuleUpdates != null) {
+                ignoredModuleUpdates.setOnPreferenceClickListener(preference -> {
+                    showIgnoredModuleUpdatesDialog();
+                    return true;
+                });
+            }
+        }
+
+        private void showIgnoredModuleUpdatesDialog() {
+            var items = buildIgnoredModuleUpdateItems();
+            if (items.isEmpty()) {
+                parentFragment.showHint(R.string.settings_no_ignored_module_updates, false);
+                return;
+            }
+            var binding = DialogIgnoredModuleUpdatesBinding.inflate(getLayoutInflater());
+            binding.title.setText(R.string.settings_ignored_module_updates);
+            binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+            var dialog = new BlurBehindDialogBuilder(requireActivity())
+                    .setView(binding.getRoot())
+                    .create();
+            binding.recyclerView.setAdapter(new IgnoredModuleUpdatesAdapter(items, dialog));
+            binding.cancel.setOnClickListener(v -> dialog.dismiss());
+            binding.title.setOnClickListener(v -> binding.recyclerView.smoothScrollToPosition(0));
+            dialog.show();
+        }
+
+        private ArrayList<IgnoredModuleUpdateItem> buildIgnoredModuleUpdateItems() {
+            var ignoredPackages = ModuleUtil.getIgnoredModuleUpdates();
+            var items = new ArrayList<IgnoredModuleUpdateItem>(ignoredPackages.size());
+            PackageManager packageManager = requireContext().getPackageManager();
+            Drawable defaultIcon = packageManager.getDefaultActivityIcon();
+            var installedModules = new HashMap<String, ModuleUtil.InstalledModule>();
+            var modules = ModuleUtil.getInstance().getModules();
+            if (modules != null) {
+                modules.values().forEach(module -> installedModules.putIfAbsent(module.packageName, module));
+            }
+            ignoredPackages.stream().sorted().forEach(packageName -> {
+                var module = installedModules.get(packageName);
+                if (module != null) {
+                    items.add(new IgnoredModuleUpdateItem(
+                            module.getAppName(),
+                            module.packageName,
+                            module.app.loadIcon(packageManager),
+                            packageName
+                    ));
+                } else {
+                    items.add(new IgnoredModuleUpdateItem(
+                            packageName,
+                            getString(R.string.module_not_installed),
+                            defaultIcon,
+                            packageName
+                    ));
+                }
+            });
+            return items;
+        }
+
+        private static class IgnoredModuleUpdateItem {
+            private final String appName;
+            private final String packageName;
+            private final Drawable icon;
+            private final String ignoredPackageName;
+
+            private IgnoredModuleUpdateItem(String appName, String packageName, Drawable icon, String ignoredPackageName) {
+                this.appName = appName;
+                this.packageName = packageName;
+                this.icon = icon;
+                this.ignoredPackageName = ignoredPackageName;
+            }
+        }
+
+        private class IgnoredModuleUpdatesAdapter extends RecyclerView.Adapter<IgnoredModuleUpdatesAdapter.ViewHolder> {
+            private final ArrayList<IgnoredModuleUpdateItem> items;
+            private final AlertDialog dialog;
+
+            private IgnoredModuleUpdatesAdapter(ArrayList<IgnoredModuleUpdateItem> items, AlertDialog dialog) {
+                this.items = items;
+                this.dialog = dialog;
+            }
+
+            @NonNull
+            @Override
+            public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                return new ViewHolder(ItemIgnoredModuleUpdateBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            }
+
+            @Override
+            public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+                var item = items.get(position);
+                holder.binding.appName.setText(item.appName);
+                holder.binding.packageName.setText(item.packageName);
+                holder.binding.icon.setImageDrawable(item.icon);
+                holder.binding.remove.setOnClickListener(v -> {
+                    int adapterPosition = holder.getBindingAdapterPosition();
+                    if (adapterPosition == RecyclerView.NO_POSITION) {
+                        return;
+                    }
+                    var removed = items.remove(adapterPosition);
+                    ModuleUtil.setUpdateIgnored(removed.ignoredPackageName, false);
+                    notifyItemRemoved(adapterPosition);
+                    if (items.isEmpty()) {
+                        dialog.dismiss();
+                        parentFragment.showHint(R.string.settings_no_ignored_module_updates, false);
+                    }
+                });
+            }
+
+            @Override
+            public int getItemCount() {
+                return items.size();
+            }
+
+            class ViewHolder extends RecyclerView.ViewHolder {
+                private final ItemIgnoredModuleUpdateBinding binding;
+
+                private ViewHolder(ItemIgnoredModuleUpdateBinding binding) {
+                    super(binding.getRoot());
+                    this.binding = binding;
+                }
             }
         }
 
