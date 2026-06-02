@@ -373,6 +373,11 @@ public class SettingsFragment extends BaseFragment {
             var binding = DialogIgnoredModuleUpdatesBinding.inflate(getLayoutInflater());
             binding.title.setText(R.string.settings_ignored_module_updates);
             binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+            var layoutParams = binding.recyclerView.getLayoutParams();
+            int itemHeight = (int) (getResources().getDisplayMetrics().density * 72);
+            int maxHeight = (int) (getResources().getDisplayMetrics().density * 360);
+            layoutParams.height = Math.min(maxHeight, items.size() * itemHeight);
+            binding.recyclerView.setLayoutParams(layoutParams);
             var dialog = new BlurBehindDialogBuilder(requireActivity())
                     .setView(binding.getRoot())
                     .create();
