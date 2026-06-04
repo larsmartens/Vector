@@ -68,33 +68,14 @@ extern "C" JNIEXPORT void JNICALL Java_org_matrix_vector_daemon_env_Dex2OatServe
                 mount(dex2oat64, d64p, nullptr, MS_BIND, nullptr);
                 mount(nullptr, d64p, nullptr, MS_BIND | MS_REMOUNT | MS_RDONLY, nullptr);
             }
-            const char* args[] = {"resetprop", "--delete", "dalvik.vm.dex2oat-flags"};
-            execlp("resetprop", args[0], args[1], args[2], nullptr);
-            execl("/data/adb/ksu/bin/resetprop", args[0], args[1], args[2], nullptr);
-            execl("/data/adb/ksu/bin/ksud", "ksud", "resetprop", args[1], args[2], nullptr);
-            execl("/data/adb/ap/bin/resetprop", args[0], args[1], args[2], nullptr);
-            execl("/data/adb/ap/bin/apatchd", "apatchd", "resetprop", args[1], args[2], nullptr);
-            execl("/data/adb/magisk/magisk", "magisk", "resetprop", args[1], args[2], nullptr);
-            execl("/system/bin/resetprop", args[0], args[1], args[2], nullptr);
         } else {
             LOGI("Disable dex2oat wrapper");
             if (r32p) umount(r32p);
             if (d32p) umount(d32p);
             if (r64p) umount(r64p);
             if (d64p) umount(d64p);
-            
-            const char* args[] = {"resetprop", "dalvik.vm.dex2oat-flags", "--inline-max-code-units=0"};
-            execlp("resetprop", args[0], args[1], args[2], nullptr);
-            execl("/data/adb/ksu/bin/resetprop", args[0], args[1], args[2], nullptr);
-            execl("/data/adb/ksu/bin/ksud", "ksud", "resetprop", args[1], args[2], nullptr);
-            execl("/data/adb/ap/bin/resetprop", args[0], args[1], args[2], nullptr);
-            execl("/data/adb/ap/bin/apatchd", "apatchd", "resetprop", args[1], args[2], nullptr);
-            execl("/data/adb/magisk/magisk", "magisk", "resetprop", args[1], args[2], nullptr);
-            execl("/system/bin/resetprop", args[0], args[1], args[2], nullptr);
         }
-
-        PLOGE("Failed to resetprop");
-        exit(1);
+        _exit(0);
     }
 }
 
