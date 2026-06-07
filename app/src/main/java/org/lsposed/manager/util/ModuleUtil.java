@@ -284,6 +284,7 @@ public final class ModuleUtil {
         public final String versionName;
         public final long versionCode;
         public final boolean legacy;
+        public final boolean supportsLegacyApi;
         public final int minVersion;
         public final int targetVersion;
         public final boolean staticScope;
@@ -311,6 +312,7 @@ public final class ModuleUtil {
 
             int parsedLegacyMinVersion = readLegacyMinVersion(app);
             boolean legacy = isLegacyModule(app);
+            boolean supportsLegacyApi = legacy && parsedLegacyMinVersion < MIN_OUTDATED_MODERN_MODULE_API;
             int minVersion = legacy ? parsedLegacyMinVersion : 0;
             int targetVersion = legacy ? parsedLegacyMinVersion : 0;
             boolean staticScope = false;
@@ -330,6 +332,8 @@ public final class ModuleUtil {
                         parsedTargetVersion = extractIntPart(prop.getProperty("targetApiVersion"), 0);
                         staticScope = TextUtils.equals(prop.getProperty("staticScope"), "true");
                     }
+                    int legacyMinVersion = parsedLegacyMinVersion != 0 ? parsedLegacyMinVersion : parsedMinVersion;
+                    supportsLegacyApi = hasLegacyEntry && legacyMinVersion < MIN_OUTDATED_MODERN_MODULE_API;
 
                     // targetApiVersion defines the modern API generation shown in the tag.
                     // API 100 hybrid modules are shown as legacy because Vector does not support
@@ -372,6 +376,7 @@ public final class ModuleUtil {
             }
 
             this.legacy = legacy;
+            this.supportsLegacyApi = supportsLegacyApi;
             this.minVersion = minVersion;
             this.targetVersion = targetVersion;
             this.staticScope = staticScope;

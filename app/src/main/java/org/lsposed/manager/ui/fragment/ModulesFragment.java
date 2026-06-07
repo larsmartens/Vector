@@ -776,7 +776,15 @@ public class ModulesFragment extends BaseFragment implements ModuleUtil.ModuleLi
         }
 
         private String getModuleApiTag(ModuleUtil.InstalledModule module) {
-            return module.legacy ? getString(R.string.module_api_legacy) : getString(R.string.module_api_version, module.targetVersion);
+            if (module.legacy) {
+                return getString(R.string.module_api_legacy);
+            }
+
+            if (module.supportsLegacyApi) {
+                return getString(R.string.module_api_version_with_legacy, module.targetVersion);
+            }
+
+            return getString(R.string.module_api_version, module.targetVersion);
         }
 
         public void refresh() {
