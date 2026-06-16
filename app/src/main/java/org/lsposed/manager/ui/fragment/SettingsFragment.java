@@ -186,7 +186,7 @@ public class SettingsFragment extends BaseFragment {
                 backup.setOnPreferenceClickListener(preference -> {
                     LocalDateTime now = LocalDateTime.now();
                     try {
-                        backupLauncher.launch(String.format(LocaleDelegate.getDefaultLocale(), "LSPosed_%s.lsp", now.toString()));
+                        backupLauncher.launch(String.format(LocaleDelegate.getDefaultLocale(), "Vector_%s.lsp", now.toString()));
                         return true;
                     } catch (ActivityNotFoundException e) {
                         parentFragment.showHint(R.string.enable_documentui, true);

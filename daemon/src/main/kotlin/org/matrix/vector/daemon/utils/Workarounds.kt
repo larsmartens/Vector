@@ -19,10 +19,25 @@ private val isLenovo = Build.MANUFACTURER.equals("lenovo", ignoreCase = true)
 private val isXiaomi = Build.MANUFACTURER.equals("xiaomi", ignoreCase = true)
 
 fun IUserManager.getRealUsers(): List<UserInfo> {
-  val users =
-      runCatching { getUsers(true, true, true) }
+  var exception: Throwable? = null
+  val users = runCatching { getUsers(true, true, true) }
+          .recoverCatching { t ->
+              if (t is NoSuchMethodError || t is NoSuchMethodException) {
+                  val method = this::class.java.methods.firstOrNull { it.name == "getUsers" && it.parameterCount == 3 }
+                  if (method != null) {
+                      @Suppress("UNCHECKED_CAST")
+                      method.invoke(this, true, true, true) as List<UserInfo>
+                  } else {
+                      val method1 = this::class.java.methods.firstOrNull { it.name == "getUsers" && it.parameterCount == 1 }
+                      if (method1 != null) {
+                          @Suppress("UNCHECKED_CAST")
+                          method1.invoke(this, true) as List<UserInfo>
+                      } else throw t
+                  }
+              } else throw t
+          }
           .recoverCatching { t -> if (t is NoSuchMethodError) getUsers(true) else throw t }
-          .onFailure { Log.e(TAG, "All user retrieval attempts failed", it) }
+          .onFailure { exception = it; Log.e(TAG, "All user retrieval attempts failed", it) }
           .getOrDefault(emptyList())
           .toMutableList()
 

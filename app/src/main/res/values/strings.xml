@@ -202,6 +202,9 @@
     <string name="update_channel_bate">Beta</string>
     <string name="update_channel_nightly">Nightly build</string>
     <!-- Module Repo -->
+    <string name="settings_disable_online_repo">Disable online repository</string>
+    <string name="settings_disable_online_repo_summary">Do not load module repository from internet</string>
+    <string name="settings_alternative_repo_url">Alternative repository URL</string>
     <string name="module_readme">Readme</string>
     <string name="module_releases">Releases</string>
     <string name="module_information">Info</string>

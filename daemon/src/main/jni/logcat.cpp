@@ -51,7 +51,7 @@ struct UniqueFd {
         if (fd >= 0) close(fd);
     }
     void reset(int n) {
-        if (fd >= 0) close(fd);
+        if (fd >= 0 && fd != n) close(fd);
         fd = n;
     }
     operator int() const { return fd; }
@@ -170,8 +170,8 @@ void Logcat::ProcessBuffer(struct log_msg* buf) {
     AndroidLogEntry entry;
     if (android_log_processLogBuffer(&buf->entry, &entry) < 0) return;
 
-    // Zero-copy tag extraction (excluding null terminator)
-    std::string_view tag(entry.tag, entry.tagLen > 0 ? entry.tagLen - 1 : 0);
+    // Zero-copy tag extraction (relying on null terminator)
+    std::string_view tag(entry.tag);
 
     // Check if tag is in the Module list
     bool is_module = std::binary_search(kModuleTags.begin(), kModuleTags.end(), tag);
@@ -191,14 +191,14 @@ void Logcat::ProcessBuffer(struct log_msg* buf) {
     // Feedback Loop: The daemon listens to its own Logcat output for remote commands.
     if (entry.pid == my_pid_ && tag == "VectorLogcat"sv) {
         std::string_view msg(entry.message, entry.messageLen);
-        if (msg == "!!start_verbose!!"sv) {
+        if (msg.starts_with("!!start_verbose!!"sv)) {
             verbose_enabled_ = true;
             verbose_written_ += FastWrite(entry, verbose_fd_);
-        } else if (msg == "!!stop_verbose!!"sv) {
+        } else if (msg.starts_with("!!stop_verbose!!"sv)) {
             verbose_enabled_ = false;
-        } else if (msg == "!!refresh_modules!!"sv) {
+        } else if (msg.starts_with("!!refresh_modules!!"sv)) {
             RefreshFd(false);
-        } else if (msg == "!!refresh_verbose!!"sv) {
+        } else if (msg.starts_with("!!refresh_verbose!!"sv)) {
             RefreshFd(true);
         }
     }

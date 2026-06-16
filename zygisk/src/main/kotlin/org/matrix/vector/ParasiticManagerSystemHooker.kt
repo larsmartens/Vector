@@ -58,56 +58,55 @@ class ParasiticManagerSystemHooker : HandleSystemServerProcessHooker.Callback {
                         }
                     }
 
-                // Locate the exact resolveActivity method
-                val resolveMethod =
-                    supervisorClass.declaredMethods.first { it.name == "resolveActivity" }
+                // Locate all resolveActivity methods (since Android may use overloaded versions)
+                supervisorClass.declaredMethods.filter { it.name == "resolveActivity" }.forEach { resolveMethod ->
+                    // Hook the resolution method to inject our redirection logic
+                    VectorHookBuilder(resolveMethod).intercept { chain ->
+                        // Execute the original resolution first
+                        val result = chain.proceed()
 
-                // Hook the resolution method to inject our redirection logic
-                VectorHookBuilder(resolveMethod).intercept { chain ->
-                    // Execute the original resolution first
-                    val result = chain.proceed()
+                        val intent = chain.args[0] as? Intent ?: return@intercept result
 
-                    val intent = chain.args[0] as? Intent ?: return@intercept result
+                        // Check if this intent is meant for the Vector Manager
+                        if (!intent.hasCategory(BuildConfig.ManagerPackageName + ".LAUNCH_MANAGER"))
+                            return@intercept result
 
-                    // Check if this intent is meant for the Vector Manager
-                    if (!intent.hasCategory(BuildConfig.ManagerPackageName + ".LAUNCH_MANAGER"))
-                        return@intercept result
+                        val originalActivityInfo =
+                            result as? ActivityInfo
+                                ?: run {
+                                    Utils.logD(
+                                        "Redirection: result is not ActivityInfo (was ${result?.javaClass?.name})"
+                                    )
+                                    return@intercept result
+                                }
 
-                    val originalActivityInfo =
-                        result as? ActivityInfo
-                            ?: run {
-                                Utils.logD(
-                                    "Redirection: result is not ActivityInfo (was ${result?.javaClass?.name})"
-                                )
-                                return@intercept result
+                        // We only intercept if it's currently resolving to the shell/fallback
+                        if (originalActivityInfo.packageName != BuildConfig.InjectedPackageName)
+                            return@intercept result
+
+                        // --- Redirection Logic ---
+                        // We create a copy of the ActivityInfo to avoid polluting the system's cache.
+                        val redirectedInfo =
+                            ActivityInfo(originalActivityInfo).apply {
+                                // Force the manager to run in its own dedicated process name
+                                processName = BuildConfig.ManagerPackageName
+
+                                // Set a standard theme so transition animations work correctly
+                                theme = android.R.style.Theme_DeviceDefault_Settings
+
+                                // Ensure the activity isn't excluded from recents by host flags
+                                flags =
+                                    flags and
+                                        (ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS or
+                                                ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS)
+                                            .inv()
                             }
 
-                    // We only intercept if it's currently resolving to the shell/fallback
-                    if (originalActivityInfo.packageName != BuildConfig.InjectedPackageName)
-                        return@intercept result
+                        // Notify the bridge service that we are about to start the manager
+                        BridgeService.getService()?.preStartManager()
 
-                    // --- Redirection Logic ---
-                    // We create a copy of the ActivityInfo to avoid polluting the system's cache.
-                    val redirectedInfo =
-                        ActivityInfo(originalActivityInfo).apply {
-                            // Force the manager to run in its own dedicated process name
-                            processName = BuildConfig.ManagerPackageName
-
-                            // Set a standard theme so transition animations work correctly
-                            theme = android.R.style.Theme_DeviceDefault_Settings
-
-                            // Ensure the activity isn't excluded from recents by host flags
-                            flags =
-                                flags and
-                                    (ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS or
-                                            ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS)
-                                        .inv()
-                        }
-
-                    // Notify the bridge service that we are about to start the manager
-                    BridgeService.getService()?.preStartManager()
-
-                    redirectedInfo
+                        redirectedInfo
+                    }
                 }
 
                 Utils.logD("Successfully hooked Activity Supervisor for Manager redirection.")

@@ -173,7 +173,7 @@ public class App extends Application {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 var table = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
                 var values = new ContentValues();
-                values.put(MediaStore.Downloads.DISPLAY_NAME, "LSPosed_crash_report" + time.toEpochSecond() + ".zip");
+                values.put(MediaStore.Downloads.DISPLAY_NAME, "Vector_crash_report" + time.toEpochSecond() + ".zip");
                 values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS);
                 var cr = getContentResolver();
                 var uri = cr.insert(table, values);
@@ -222,10 +222,10 @@ public class App extends Application {
                 Log.d(TAG, "onReceive: " + intent);
                 switch (intent.getAction()) {
                     case Intent.ACTION_PACKAGE_ADDED, Intent.ACTION_PACKAGE_CHANGED, Intent.ACTION_PACKAGE_FULLY_REMOVED, Intent.ACTION_UID_REMOVED -> {
-                        var userId = intent.getIntExtra(Intent.EXTRA_USER, 0);
-                        var packageName = intent.getStringExtra("android.intent.extra.PACKAGES");
-                        var packageRemovedForAllUsers = intent.getBooleanExtra(EXTRA_REMOVED_FOR_ALL_USERS, false);
-                        var isXposedModule = intent.getBooleanExtra("isXposedModule", false);
+                        var userId = inIntent.getIntExtra(Intent.EXTRA_USER, 0);
+                        var packageName = inIntent.getStringExtra("android.intent.extra.PACKAGES");
+                        var packageRemovedForAllUsers = inIntent.getBooleanExtra(EXTRA_REMOVED_FOR_ALL_USERS, false);
+                        var isXposedModule = inIntent.getBooleanExtra("isXposedModule", false);
                         if (packageName != null) {
                             if (isXposedModule)
                                 ModuleUtil.getInstance().reloadSingleModule(packageName, userId, packageRemovedForAllUsers);
@@ -236,7 +236,7 @@ public class App extends Application {
                     case ACTION_USER_ADDED, ACTION_USER_REMOVED, ACTION_USER_INFO_CHANGED -> App.getExecutorService().submit(() -> ModuleUtil.getInstance().reloadInstalledModules());
                 }
             }
-        }, intentFilter, Context.RECEIVER_NOT_EXPORTED);
+        }, intentFilter, Context.RECEIVER_EXPORTED);
 
         UpdateUtil.loadRemoteVersion();
     }

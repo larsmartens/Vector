@@ -68,6 +68,16 @@ object VectorStartup {
             } catch (ignored: Throwable) {}
         }
 
+        // Workaround for Android 15 SystemUI MediaRouter2 crash (Issue #755)
+        if (Build.VERSION.SDK_INT >= 35) {
+            try {
+                val mediaRouterClass = Class.forName("android.media.MediaRouter2")
+                mediaRouterClass.declaredMethods
+                    .filter { it.name == "loadSystemRoutes" }
+                    .forEach { VectorHookBuilder(it).intercept(MediaRouter2Hooker) }
+            } catch (ignored: Throwable) {}
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             loadedApkClass.declaredMethods
                 .filter { it.name == "createAppFactory" }

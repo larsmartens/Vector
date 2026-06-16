@@ -366,7 +366,7 @@ public class RepoFragment extends BaseFragment implements RepoLoader.RepoListene
             });
         }
 
-        public void setData(Collection<OnlineModule> modules) {
+        public void setData(Collection<OnlineModule> modules, String queryStr) {
             if (modules == null) return;
             setLoaded(null, false);
             channel = App.getPreferences().getString("update_channel", channels[0]);
@@ -387,7 +387,6 @@ public class RepoFragment extends BaseFragment implements RepoLoader.RepoListene
                             return Instant.parse(repoLoader.getLatestReleaseTime(b.getName(), channel)).compareTo(Instant.parse(repoLoader.getLatestReleaseTime(a.getName(), channel)));
                         }
                     }).collect(Collectors.toList());
-            String queryStr = searchView != null ? searchView.getQuery().toString() : "";
             runOnUiThread(() -> getFilter().filter(queryStr));
         }
 
@@ -400,7 +399,8 @@ public class RepoFragment extends BaseFragment implements RepoLoader.RepoListene
         }
 
         public void refresh() {
-            runAsync(() -> adapter.setData(repoLoader.getOnlineModules()));
+            String queryStr = searchView != null ? searchView.getQuery().toString() : "";
+            runAsync(() -> adapter.setData(repoLoader.getOnlineModules(), queryStr));
         }
 
         @Override
