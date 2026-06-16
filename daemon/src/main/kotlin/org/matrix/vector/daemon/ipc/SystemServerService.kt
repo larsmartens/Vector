@@ -45,6 +45,11 @@ object SystemServerService : ILSPSystemServerService.Stub(), IBinder.DeathRecipi
             proxyServiceName = serviceName
           }
           .onFailure { Log.e(TAG, "Failed to register IServiceCallback", it) }
+    } else {
+      runCatching {
+        ServiceManager.addService(serviceName, this)
+        proxyServiceName = serviceName
+      }.onFailure { Log.e(TAG, "Failed to register proxy service", it) }
     }
   }
 

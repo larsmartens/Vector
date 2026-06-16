@@ -58,12 +58,17 @@ object FileSystem {
 
   init {
     runCatching {
-          Files.createDirectories(basePath)
-          Os.chmod(basePath.toString(), "700".toInt(8))
-          SELinux.setFileContext(basePath.toString(), "u:object_r:system_file:s0")
-          Files.createDirectories(configDirPath)
-        }
-        .onFailure { Log.e(TAG, "Failed to initialize directories", it) }
+      Files.createDirectories(basePath)
+      Os.chmod(basePath.toString(), "700".toInt(8))
+    }.onFailure { Log.e(TAG, "Failed to initialize basePath", it) }
+
+    runCatching {
+      SELinux.setFileContext(basePath.toString(), "u:object_r:system_file:s0")
+    }.onFailure { Log.e(TAG, "Failed to set SELinux context for basePath", it) }
+
+    runCatching {
+      Files.createDirectories(configDirPath)
+    }.onFailure { Log.e(TAG, "Failed to initialize configDirPath", it) }
   }
 
   fun setupCli(): String {
