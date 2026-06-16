@@ -1,6 +1,6 @@
 {
-	"version": "v2.0",
-	"versionCode": 3060,
-	"zipUrl": "https://github.com/larsmartens/Vector/releases/download/vector-3060/Vector-v2.0-3060-Release.zip",
+	"version": "v2.0.2",
+	"versionCode": 3063,
+	"zipUrl": "https://github.com/larsmartens/Vector/releases/download/v2.0.2/Vector-v2.0.2-3063-Release.zip",
 	"changelog": "https://raw.githubusercontent.com/larsmartens/Vector/master/zygisk/changelog.md"
 }
