@@ -60,9 +60,14 @@ object FileSystem {
   init {
     runCatching {
           Files.createDirectories(basePath)
-          Os.chmod(basePath.toString(), "700".toInt(8))
           Files.createDirectories(configDirPath)
           setSelinuxContextRecursive(basePath, VECTOR_DATA_CONTEXT)
+          Os.chmod("/data/adb", "711".toInt(8))
+          Os.chmod(basePath.toString(), "755".toInt(8))
+          Os.chmod(configDirPath.toString(), "777".toInt(8))
+          configDirPath.toFile().listFiles { file -> file.name.startsWith(dbPath.name) }?.forEach {
+            Os.chmod(it.absolutePath, "666".toInt(8))
+          }
         }
         .onFailure { Log.e(TAG, "Failed to initialize directories", it) }
   }
