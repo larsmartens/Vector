@@ -393,12 +393,27 @@ public class ModulesFragment extends BaseFragment implements ModuleUtil.ModuleLi
             int userId = arguments.getInt("user_id");
             binding = SwiperefreshRecyclerviewBinding.inflate(getLayoutInflater(), container, false);
             adapter = fragment.adapters.get(userId);
-            binding.recyclerView.setAdapter(adapter);
-            binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
-            binding.swipeRefreshLayout.setOnRefreshListener(adapter::fullRefresh);
-            binding.swipeRefreshLayout.setProgressViewEndTarget(true, binding.swipeRefreshLayout.getProgressViewEndOffset());
-            RecyclerViewKt.fixEdgeEffect(binding.recyclerView, false, true);
-            adapter.registerAdapterDataObserver(observer);
+            if (adapter == null) {
+                var users = moduleUtil.getUsers();
+                if (users != null) {
+                    for (var user : users) {
+                        if (user.id == userId) {
+                            adapter = fragment.new ModuleAdapter(user);
+                            adapter.setHasStableIds(true);
+                            fragment.adapters.put(userId, adapter);
+                            break;
+                        }
+                    }
+                }
+            }
+            if (adapter != null) {
+                binding.recyclerView.setAdapter(adapter);
+                binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
+                binding.swipeRefreshLayout.setOnRefreshListener(adapter::fullRefresh);
+                binding.swipeRefreshLayout.setProgressViewEndTarget(true, binding.swipeRefreshLayout.getProgressViewEndOffset());
+                RecyclerViewKt.fixEdgeEffect(binding.recyclerView, false, true);
+                adapter.registerAdapterDataObserver(observer);
+            }
             return binding.getRoot();
         }
 
@@ -443,7 +458,9 @@ public class ModulesFragment extends BaseFragment implements ModuleUtil.ModuleLi
 
         @Override
         public void onDestroyView() {
-            adapter.unregisterAdapterDataObserver(observer);
+            if (adapter != null) {
+                adapter.unregisterAdapterDataObserver(observer);
+            }
             super.onDestroyView();
         }
 
