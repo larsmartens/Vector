@@ -5,6 +5,7 @@
 #include <elf/elf_image.h>
 #include <elf/symbol_cache.h>
 #include <jni/jni_bridge.h>
+#include <sys/system_properties.h>
 #include <unistd.h>
 
 #include <zygisk.hpp>
