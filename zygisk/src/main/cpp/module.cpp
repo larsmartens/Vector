@@ -5,10 +5,7 @@
 #include <elf/elf_image.h>
 #include <elf/symbol_cache.h>
 #include <jni/jni_bridge.h>
-#include <sys/system_properties.h>
 #include <unistd.h>
-
-#include <cstdlib>
 
 #include <zygisk.hpp>
 
@@ -44,14 +41,6 @@ enum RuntimeFlags : uint32_t {
     // Flags defined by NeoZygisk
     LATE_INJECT = 1 << 30,
 };
-
-int GetAndroidSdkInt() {
-    char sdk[PROP_VALUE_MAX] = {};
-    if (__system_property_get("ro.build.version.sdk", sdk) <= 0) {
-        return 0;
-    }
-    return std::atoi(sdk);
-}
 
 // A simply ConfigBridge implemnetation holding obfuscation maps in memory
 using obfuscation_map_t = std::map<std::string, std::string>;
@@ -384,13 +373,6 @@ void VectorModule::postServerSpecialize(const zygisk::ServerSpecializeArgs *args
 
     LOGD("Attempting injection into system_server.");
 
-    if (GetAndroidSdkInt() >= 36) {
-        LOGE("Skipping system_server injection on Android 16+ because LSPlant/Dobby crashes "
-             "while patching ART in this process on the current device.");
-        SetAllowUnload(true);
-        return;
-    }
-
     // --- Device-Specific Workaround ---
     // Some ZTE devices require argv[0] to be explicitly set to "system_server"
     // for certain services to function correctly after modification.
@@ -446,12 +428,13 @@ void VectorModule::postServerSpecialize(const zygisk::ServerSpecializeArgs *args
     }
     close(dex_fd);
 
+    ipc_bridge.HookBridge(env_);
+
     if (!this->InitArtHooker(env_, init_info_)) {
-        LOGE("Skip injection because LSPlant initialization failed.");
-        SetAllowUnload(true);
+        LOGE("Continuing with Vector IPC bridge only because LSPlant initialization failed.");
+        SetAllowUnload(false);
         return;
     }
-    ipc_bridge.HookBridge(env_);
     this->InitHooks(env_);
     this->SetupEntryClass(env_);
 
