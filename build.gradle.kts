@@ -23,7 +23,7 @@ abstract class GitCommitCountValueSource : ValueSource<String, ValueSourceParame
         val output = ByteArrayOutputStream()
         val result =
             execOperations.exec {
-                commandLine("git", "rev-list", "--count", "refs/remotes/origin/master")
+                commandLine("git", "rev-list", "--count", "HEAD")
                 standardOutput = output
                 isIgnoreExitValue = true
             }
@@ -41,6 +41,8 @@ abstract class GitLatestTagValueSource : ValueSource<String, ValueSourceParamete
     @get:Inject abstract val execOperations: ExecOperations
 
     override fun obtain(): String {
+        System.getenv("VECTOR_VERSION_NAME")?.takeIf { it.isNotBlank() }?.let { return it }
+
         val output = ByteArrayOutputStream()
         val result =
             execOperations.exec {

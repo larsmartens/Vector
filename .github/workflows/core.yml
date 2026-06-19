@@ -16,6 +16,7 @@ jobs:
       CCACHE_NOHASHDIR: "true"
       CCACHE_HARDLINK: "true"
       CCACHE_BASEDIR: "${{ github.workspace }}"
+      VECTOR_VERSION_NAME: "2.1.0-pixel"
 
     steps:
       - name: Checkout
