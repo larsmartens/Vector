@@ -81,9 +81,9 @@ private:
 // --- Binder IPC Protocol Constants ---
 // These are the "secret handshakes" used to communicate with the Vector manager service.
 
-// The name of the system service we use as a rendezvous point to find our manager service.
-// Using "activity" is a common technique as it's always available.
-constexpr auto kBridgeServiceName = "activity"sv;
+// The daemon-owned proxy service used as a rendezvous point for application processes.
+// This avoids installing a JNI transaction hook in system_server on Android 16.
+constexpr auto kBridgeServiceName = "serial"sv;
 
 // Transaction codes for specific actions.
 constexpr jint kBridgeTransactionCode = ('_' << 24) | ('V' << 16) | ('E' << 8) | 'C';

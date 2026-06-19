@@ -8,6 +8,8 @@
 #include <sys/system_properties.h>
 #include <unistd.h>
 
+#include <cstdlib>
+
 #include <zygisk.hpp>
 
 #include "ipc_bridge.h"
@@ -42,6 +44,14 @@ enum RuntimeFlags : uint32_t {
     // Flags defined by NeoZygisk
     LATE_INJECT = 1 << 30,
 };
+
+int GetAndroidSdkInt() {
+    char sdk[PROP_VALUE_MAX] = {};
+    if (__system_property_get("ro.build.version.sdk", sdk) <= 0) {
+        return 0;
+    }
+    return std::atoi(sdk);
+}
 
 // A simply ConfigBridge implemnetation holding obfuscation maps in memory
 using obfuscation_map_t = std::map<std::string, std::string>;
@@ -373,6 +383,12 @@ void VectorModule::postServerSpecialize(const zygisk::ServerSpecializeArgs *args
     }
 
     LOGD("Attempting injection into system_server.");
+
+    if (GetAndroidSdkInt() >= 36) {
+        LOGE("Skipping system_server injection on Android 16+; app IPC uses the daemon proxy.");
+        SetAllowUnload(true);
+        return;
+    }
 
     // --- Device-Specific Workaround ---
     // Some ZTE devices require argv[0] to be explicitly set to "system_server"
