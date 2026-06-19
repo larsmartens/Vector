@@ -287,7 +287,7 @@ public class RepoItemFragment extends BaseFragment implements RepoLoader.RepoLis
     public boolean onMenuItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.menu_open_in_browser) {
-            NavUtil.startURL(requireActivity(), "https://backup.modules.lsposed.org/module/" + module.getName());
+            NavUtil.startURL(requireActivity(), "https://modules.lsposed.org/module/" + module.getName());
             return true;
         }
         return false;
