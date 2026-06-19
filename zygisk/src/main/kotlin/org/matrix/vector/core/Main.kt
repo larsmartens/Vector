@@ -35,6 +35,10 @@ object Main {
             ParasiticManagerSystemHooker.start()
         }
 
+        if (isSystem || niceName == BuildConfig.GrapheneSettingsPackageName) {
+            ParasiticManagerHooker.patchGrapheneDCLRestriction()
+        }
+
         // Initialize Xposed bridge components
         val appService = ILSPApplicationService.Stub.asInterface(binder)
         Startup.initXposed(isSystem, niceName, appDir, appService)

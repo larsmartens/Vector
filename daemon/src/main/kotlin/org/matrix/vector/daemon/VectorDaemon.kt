@@ -97,6 +97,11 @@ object VectorDaemon {
 
     applyNotificationWorkaround()
 
+    // Force open the database as root (EUID 0) so the connection is cached
+    // before dropping privileges. This prevents SQLiteCantOpenDatabaseException
+    // when accessing the DB as system (EUID 1000) on restricted environments.
+    runCatching { ConfigCache.dbHelper.writableDatabase }
+
     // Setup IPC channel for applications by injecting DaemonService binder
     sendToBridge(VectorService.asBinder(), false, systemServerMaxRetry)
 

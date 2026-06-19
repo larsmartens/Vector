@@ -117,6 +117,12 @@ class VectorModuleClassLoader : ByteBufferDexClassLoader {
         }
     }
 
+    // Needed for system_server to construct the correct library path
+    // Fixes HMA v3.8 crash (Issue #729)
+    override fun getLdLibraryPath(): String {
+        return nativeLibraryDirs.joinToString(File.pathSeparator) { it.path }
+    }
+
     override fun findResources(name: String): Enumeration<URL> {
         val url = findResource(name)
         val result = if (url != null) listOf(url) else emptyList()

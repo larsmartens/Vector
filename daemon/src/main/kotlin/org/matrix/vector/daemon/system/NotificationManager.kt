@@ -203,7 +203,7 @@ object NotificationManager {
 
     createChannels()
     runCatching {
-      nm?.enqueueNotificationWithTag("android", opPkg, modulePkg, modulePkg.hashCode(), notif, 0)
+      nm?.enqueueNotificationWithTag("android", opPkg, modulePkg, modulePkg.hashCode(), notif, moduleUserId)
     }
   }
 
@@ -263,7 +263,7 @@ object NotificationManager {
     createChannels()
     runCatching {
       nm?.enqueueNotificationWithTag(
-          "android", opPkg, modulePackageName, modulePackageName.hashCode(), notif, 0)
+          "android", opPkg, modulePackageName, modulePackageName.hashCode(), notif, moduleUserId)
     }
   }
 }

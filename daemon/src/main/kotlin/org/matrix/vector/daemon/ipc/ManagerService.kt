@@ -55,6 +55,13 @@ object ManagerService : ILSPManagerService.Stub() {
     private val connection =
         object : android.app.IServiceConnection.Stub() {
           override fun connected(name: ComponentName?, service: IBinder?, dead: Boolean) {}
+
+          override fun connected(
+              name: ComponentName?,
+              service: IBinder?,
+              session: android.app.IBinderSession?,
+              dead: Boolean
+          ) {}
         }
 
     init {

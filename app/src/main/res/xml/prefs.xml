@@ -108,6 +108,18 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_group_repo">
+        <rikka.material.preference.MaterialSwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_outline_shield_24"
+            android:key="disable_online_repo"
+            android:summary="@string/settings_disable_online_repo_summary"
+            android:title="@string/settings_disable_online_repo" />
+        <EditTextPreference
+            android:defaultValue=""
+            android:icon="@drawable/ic_outline_dns_24"
+            android:key="alternative_repo_url"
+            android:summary="%s"
+            android:title="@string/settings_alternative_repo_url" />
         <rikka.preference.SimpleMenuPreference
             android:defaultValue="CHANNEL_STABLE"
             android:entries="@array/update_channel_texts"

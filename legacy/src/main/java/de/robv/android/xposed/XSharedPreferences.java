@@ -41,7 +41,7 @@ import de.robv.android.xposed.services.FileResult;
  */
 public final class XSharedPreferences implements SharedPreferences {
     private static final String TAG = "XSharedPreferences";
-    private static final HashMap<WatchKey, PrefsData> sWatcherKeyInstances = new HashMap<>();
+    private static final HashMap<WatchKey, java.util.concurrent.CopyOnWriteArrayList<PrefsData>> sWatcherKeyInstances = new HashMap<>();
     private static final Object sContent = new Object();
     private static final Method sReadMapXmlMethod;
     private static Thread sWatcherDaemon = null;
@@ -103,14 +103,18 @@ public final class XSharedPreferences implements SharedPreferences {
                         } else if (SELinuxHelper.getAppDataFileService().checkFileExists(pathStr + ".bak")) {
                             continue;
                         }
-                        PrefsData data = sWatcherKeyInstances.get(key);
-                        if (data != null && data.hasChanged()) {
-                            for (OnSharedPreferenceChangeListener l : data.mPrefs.mListeners.keySet()) {
-                                try {
-                                    l.onSharedPreferenceChanged(data.mPrefs, null);
-                                } catch (Throwable t) {
-                                    if (BuildConfig.DEBUG)
-                                        Log.e(TAG, "Fail in preference change listener", t);
+                        java.util.concurrent.CopyOnWriteArrayList<PrefsData> dataList = sWatcherKeyInstances.get(key);
+                        if (dataList != null) {
+                            for (PrefsData data : dataList) {
+                                if (data.hasChanged()) {
+                                    for (OnSharedPreferenceChangeListener l : data.mPrefs.mListeners.keySet()) {
+                                        try {
+                                            l.onSharedPreferenceChanged(data.mPrefs, null);
+                                        } catch (Throwable t) {
+                                            if (BuildConfig.DEBUG)
+                                                Log.e(TAG, "Fail in preference change listener", t);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -199,7 +203,12 @@ public final class XSharedPreferences implements SharedPreferences {
                 }
                 mWatchKey = path.getParent().register(sWatcher, StandardWatchEventKinds.ENTRY_CREATE,
                         StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
-                sWatcherKeyInstances.put(mWatchKey, new PrefsData(this));
+                java.util.concurrent.CopyOnWriteArrayList<PrefsData> dataList = sWatcherKeyInstances.get(mWatchKey);
+                if (dataList == null) {
+                    dataList = new java.util.concurrent.CopyOnWriteArrayList<>();
+                    sWatcherKeyInstances.put(mWatchKey, dataList);
+                }
+                dataList.addIfAbsent(new PrefsData(this));
                 if (sWatcherDaemon == null || !sWatcherDaemon.isAlive()) {
                     initWatcherDaemon();
                 }
@@ -215,11 +224,20 @@ public final class XSharedPreferences implements SharedPreferences {
 
     private void tryUnregisterWatcher() {
         synchronized (sWatcherKeyInstances) {
-            if (mWatchKey != null) {
-                sWatcherKeyInstances.remove(mWatchKey);
-                mWatchKey.cancel();
-                mWatchKey = null;
-            }
+                java.util.concurrent.CopyOnWriteArrayList<PrefsData> dataList = sWatcherKeyInstances.get(mWatchKey);
+                if (dataList != null) {
+                    for (PrefsData d : dataList) {
+                        if (d.mPrefs == this) {
+                            dataList.remove(d);
+                            break;
+                        }
+                    }
+                    if (dataList.isEmpty()) {
+                        sWatcherKeyInstances.remove(mWatchKey);
+                        mWatchKey.cancel();
+                        mWatchKey = null;
+                    }
+                }
             boolean atLeastOneValid = false;
             for (WatchKey key : sWatcherKeyInstances.keySet()) {
                 atLeastOneValid |= key.isValid();

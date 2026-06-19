@@ -8,6 +8,8 @@ import android.os.IInterface;
 public interface IServiceConnection extends IInterface {
     void connected(ComponentName name, IBinder service, boolean dead);
 
+    void connected(ComponentName name, IBinder service, IBinderSession session, boolean dead);
+
     abstract class Stub extends Binder implements IServiceConnection {
 
         public static IServiceConnection asInterface(IBinder obj) {

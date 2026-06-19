@@ -233,33 +233,36 @@ public class ModulesFragment extends BaseFragment implements ModuleUtil.ModuleLi
 
     @Override
     public void onModulesReloaded() {
-        var users = moduleUtil.getUsers();
-        if (users == null) return;
+        runOnUiThread(() -> {
+            if (binding == null) return;
+            var users = moduleUtil.getUsers();
+            if (users == null) return;
 
-        if (users.size() != 1) {
-            binding.viewPager.setUserInputEnabled(true);
-            binding.tabLayout.setVisibility(View.VISIBLE);
-            binding.fab.show();
-        } else {
-            binding.viewPager.setUserInputEnabled(false);
-            binding.tabLayout.setVisibility(View.GONE);
-        }
-
-        var tmp = new SparseArray<ModuleAdapter>(users.size());
-        var snapshot = adapters;
-        for (var user : users) {
-            if (snapshot.indexOfKey(user.id) >= 0) {
-                tmp.put(user.id, snapshot.get(user.id));
+            if (users.size() != 1) {
+                binding.viewPager.setUserInputEnabled(true);
+                binding.tabLayout.setVisibility(View.VISIBLE);
+                binding.fab.show();
             } else {
-                var adapter = new ModuleAdapter(user);
-                adapter.setHasStableIds(true);
-                tmp.put(user.id, adapter);
+                binding.viewPager.setUserInputEnabled(false);
+                binding.tabLayout.setVisibility(View.GONE);
             }
-        }
-        adapters = tmp;
-        forEachAdaptor(ModuleAdapter::refresh);
-        runOnUiThread(pagerAdapter::notifyDataSetChanged);
-        updateModuleSummary();
+
+            var tmp = new SparseArray<ModuleAdapter>(users.size());
+            var snapshot = adapters;
+            for (var user : users) {
+                if (snapshot.indexOfKey(user.id) >= 0) {
+                    tmp.put(user.id, snapshot.get(user.id));
+                } else {
+                    var adapter = new ModuleAdapter(user);
+                    adapter.setHasStableIds(true);
+                    tmp.put(user.id, adapter);
+                }
+            }
+            adapters = tmp;
+            forEachAdaptor(ModuleAdapter::refresh);
+            pagerAdapter.notifyDataSetChanged();
+            updateModuleSummary();
+        });
     }
 
     @Override
@@ -390,12 +393,27 @@ public class ModulesFragment extends BaseFragment implements ModuleUtil.ModuleLi
             int userId = arguments.getInt("user_id");
             binding = SwiperefreshRecyclerviewBinding.inflate(getLayoutInflater(), container, false);
             adapter = fragment.adapters.get(userId);
-            binding.recyclerView.setAdapter(adapter);
-            binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
-            binding.swipeRefreshLayout.setOnRefreshListener(adapter::fullRefresh);
-            binding.swipeRefreshLayout.setProgressViewEndTarget(true, binding.swipeRefreshLayout.getProgressViewEndOffset());
-            RecyclerViewKt.fixEdgeEffect(binding.recyclerView, false, true);
-            adapter.registerAdapterDataObserver(observer);
+            if (adapter == null) {
+                var users = moduleUtil.getUsers();
+                if (users != null) {
+                    for (var user : users) {
+                        if (user.id == userId) {
+                            adapter = fragment.new ModuleAdapter(user);
+                            adapter.setHasStableIds(true);
+                            fragment.adapters.put(userId, adapter);
+                            break;
+                        }
+                    }
+                }
+            }
+            if (adapter != null) {
+                binding.recyclerView.setAdapter(adapter);
+                binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
+                binding.swipeRefreshLayout.setOnRefreshListener(adapter::fullRefresh);
+                binding.swipeRefreshLayout.setProgressViewEndTarget(true, binding.swipeRefreshLayout.getProgressViewEndOffset());
+                RecyclerViewKt.fixEdgeEffect(binding.recyclerView, false, true);
+                adapter.registerAdapterDataObserver(observer);
+            }
             return binding.getRoot();
         }
 
@@ -440,7 +458,9 @@ public class ModulesFragment extends BaseFragment implements ModuleUtil.ModuleLi
 
         @Override
         public void onDestroyView() {
-            adapter.unregisterAdapterDataObserver(observer);
+            if (adapter != null) {
+                adapter.unregisterAdapterDataObserver(observer);
+            }
             super.onDestroyView();
         }
 
@@ -618,14 +638,84 @@ public class ModulesFragment extends BaseFragment implements ModuleUtil.ModuleLi
                     return false;
                 });
                 holder.itemView.setOnCreateContextMenuListener((menu, v, menuInfo) -> {
+                    selectedModule = item;
                     requireActivity().getMenuInflater().inflate(R.menu.context_menu_modules, menu);
                     menu.setHeaderTitle(item.getAppName());
                     Intent intent = AppHelper.getSettingsIntent(item.packageName, item.userId);
+                    
                     if (intent == null) {
                         menu.removeItem(R.id.menu_launch);
+                    } else {
+                        MenuItem menuLaunch = menu.findItem(R.id.menu_launch);
+                        if (menuLaunch != null) {
+                            menuLaunch.setOnMenuItemClickListener(i -> {
+                                ConfigManager.startActivityAsUserWithFeature(intent, item.userId);
+                                return true;
+                            });
+                        }
                     }
+                    
+                    MenuItem menuOtherApp = menu.findItem(R.id.menu_other_app);
+                    if (menuOtherApp != null) {
+                        menuOtherApp.setOnMenuItemClickListener(i -> {
+                            var otherIntent = new Intent(Intent.ACTION_SHOW_APP_INFO);
+                            otherIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, item.packageName);
+                            otherIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            ConfigManager.startActivityAsUserWithFeature(otherIntent, item.userId);
+                            return true;
+                        });
+                    }
+
+                    MenuItem menuAppInfo = menu.findItem(R.id.menu_app_info);
+                    if (menuAppInfo != null) {
+                        menuAppInfo.setOnMenuItemClickListener(i -> {
+                            ConfigManager.startActivityAsUserWithFeature(new Intent(ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", item.packageName, null)), item.userId);
+                            return true;
+                        });
+                    }
+
+                    MenuItem menuUninstall = menu.findItem(R.id.menu_uninstall);
+                    if (menuUninstall != null) {
+                        menuUninstall.setOnMenuItemClickListener(i -> {
+                            new BlurBehindDialogBuilder(requireActivity(), R.style.ThemeOverlay_MaterialAlertDialog_FullWidthButtons)
+                                    .setIcon(item.app.loadIcon(pm))
+                                    .setTitle(item.getAppName())
+                                    .setMessage(R.string.module_uninstall_message)
+                                    .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                                            runAsync(() -> {
+                                                boolean success = ConfigManager.uninstallPackage(item.packageName, item.userId);
+                                                String text = success ? getString(R.string.module_uninstalled, item.getAppName()) : getString(R.string.module_uninstall_failed);
+                                                showHint(text, false);
+                                                if (success)
+                                                    moduleUtil.reloadSingleModule(item.packageName, item.userId);
+                                            }))
+                                    .setNegativeButton(android.R.string.cancel, null)
+                                    .show();
+                            return true;
+                        });
+                    }
+
                     if (repoLoader.getOnlineModule(item.packageName) == null) {
                         menu.removeItem(R.id.menu_repo);
+                    } else {
+                        MenuItem menuRepo = menu.findItem(R.id.menu_repo);
+                        if (menuRepo != null) {
+                            menuRepo.setOnMenuItemClickListener(i -> {
+                                var navController = getNavController();
+                                navController.navigate(
+                                        new Uri.Builder().scheme("lsposed").authority("repo").appendQueryParameter("modulePackageName", item.packageName).build(),
+                                        new NavOptions.Builder().setEnterAnim(R.anim.fragment_enter).setExitAnim(R.anim.fragment_exit).setPopEnterAnim(R.anim.fragment_enter_pop).setPopExitAnim(R.anim.fragment_exit_pop).setLaunchSingleTop(true).setPopUpTo(getNavController().getGraph().getStartDestinationId(), false, true).build());
+                                return true;
+                            });
+                        }
+                    }
+
+                    MenuItem menuCompileSpeed = menu.findItem(R.id.menu_compile_speed);
+                    if (menuCompileSpeed != null) {
+                        menuCompileSpeed.setOnMenuItemClickListener(i -> {
+                            CompileDialogFragment.speed(getChildFragmentManager(), item.pkg.applicationInfo);
+                            return true;
+                        });
                     }
                     if (item.userId == 0) {
                         var users = ConfigManager.getUsers();
@@ -679,7 +769,8 @@ public class ModulesFragment extends BaseFragment implements ModuleUtil.ModuleLi
         }
 
         public void refresh() {
-            runAsync(reloadModules);
+            String queryStr = searchView != null ? searchView.getQuery().toString() : "";
+            runAsync(() -> reloadModules(queryStr));
         }
 
         public void fullRefresh() {
@@ -690,7 +781,7 @@ public class ModulesFragment extends BaseFragment implements ModuleUtil.ModuleLi
             });
         }
 
-        private final Runnable reloadModules = () -> {
+        private void reloadModules(String queryStr) {
             var modules = moduleUtil.getModules();
             if (modules == null) return;
             Comparator<PackageInfo> cmp = AppHelper.getAppListComparator(0, pm);
@@ -729,10 +820,9 @@ public class ModulesFragment extends BaseFragment implements ModuleUtil.ModuleLi
                             }
                         }
                     });
-            String queryStr = searchView != null ? searchView.getQuery().toString() : "";
             searchList = tmpList;
             runOnUiThread(() -> getFilter().filter(queryStr));
-        };
+        }
 
         @SuppressLint("NotifyDataSetChanged")
         private void setLoaded(List<ModuleUtil.InstalledModule> list, boolean loaded) {

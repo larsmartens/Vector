@@ -98,6 +98,22 @@ public class RepoLoader {
 
     synchronized public void loadRemoteData() {
         repoLoaded = false;
+        if (App.getPreferences().getBoolean("disable_online_repo", false)) {
+            repoLoaded = true;
+            for (RepoListener listener : listeners) {
+                listener.onRepoLoaded();
+            }
+            return;
+        }
+        
+        String userUrl = App.getPreferences().getString("alternative_repo_url", "");
+        if (userUrl != null && !userUrl.trim().isEmpty()) {
+            repoUrl = userUrl.trim();
+            if (!repoUrl.endsWith("/")) repoUrl += "/";
+        } else if (!repoUrl.equals(backupRepoUrl) && !repoUrl.equals(secondBackupRepoUrl)) {
+            repoUrl = originRepoUrl;
+        }
+
         try {
             try (var response = App.getOkHttpClient().newCall(new Request.Builder().url(repoUrl + "modules.json").build()).execute()) {
 
@@ -248,6 +264,16 @@ public class RepoLoader {
     }
 
     public void loadRemoteReleases(String packageName) {
+        if (App.getPreferences().getBoolean("disable_online_repo", false)) return;
+        
+        String userUrl = App.getPreferences().getString("alternative_repo_url", "");
+        if (userUrl != null && !userUrl.trim().isEmpty()) {
+            repoUrl = userUrl.trim();
+            if (!repoUrl.endsWith("/")) repoUrl += "/";
+        } else if (!repoUrl.equals(backupRepoUrl) && !repoUrl.equals(secondBackupRepoUrl)) {
+            repoUrl = originRepoUrl;
+        }
+
         App.getOkHttpClient().newCall(new Request.Builder().url(String.format(repoUrl + "module/%s.json", packageName)).build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {

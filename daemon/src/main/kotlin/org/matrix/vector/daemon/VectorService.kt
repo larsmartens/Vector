@@ -67,7 +67,7 @@ object VectorService : IDaemonService.Stub() {
     if (ApplicationService.hasRegister(uid, pid)) return null
 
     val scope = ProcessScope(processName, uid)
-    if (!ManagerService.tryRegisterManagerProcess(pid, uid, processName) &&
+    if (processName != BuildConfig.GRAPHENE_SETTINGS_PACKAGE_NAME && !ManagerService.tryRegisterManagerProcess(pid, uid, processName) &&
         ConfigCache.shouldSkipProcess(scope)) {
       Log.d(TAG, "Skipped $processName/$uid")
       return null
@@ -102,8 +102,7 @@ object VectorService : IDaemonService.Stub() {
             }
           }
 
-          // Critical for ordered broadcasts to avoid freezing the system queue
-          if (!ordered && intent.action != Intent.ACTION_LOCKED_BOOT_COMPLETED) return
+          // We must always call finishReceiver in Android 14+ because assumeDelivered might be false for unordered broadcasts.
           runCatching {
                 val appThread = SystemContext.appThread
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -244,16 +243,19 @@ object VectorService : IDaemonService.Stub() {
 
     Log.d(TAG, "dispatchPackageChanged $action $moduleName [$uid]")
 
-    val appInfo =
-        moduleName?.let {
-          packageManager
-              ?.getPackageInfoCompat(it, MATCH_ALL_FLAGS or PackageManager.GET_META_DATA, 0)
-              ?.applicationInfo
-        }
-    var isXposedModule =
-        appInfo != null &&
-            (appInfo.metaData?.containsKey("xposedminversion") == true ||
-                ConfigCache.getModuleApkPath(appInfo) != null)
+    val isRemovedAction = action == Intent.ACTION_PACKAGE_FULLY_REMOVED || action == Intent.ACTION_UID_REMOVED
+
+    // Defer querying PackageManager to avoid exhausting binder threads when a user is removed
+    // (which triggers hundreds of ACTION_PACKAGE_FULLY_REMOVED broadcasts).
+    val appInfo = if (!isRemovedAction && moduleName != null) {
+      packageManager?.getPackageInfoCompat(moduleName, MATCH_ALL_FLAGS or PackageManager.GET_META_DATA, 0)?.applicationInfo
+    } else null
+
+    var isXposedModule = if (!isRemovedAction) {
+      appInfo != null && (appInfo.metaData?.containsKey("xposedminversion") == true || ConfigCache.getModuleApkPath(appInfo) != null)
+    } else {
+      moduleName != null && ConfigCache.state.modules.keys.any { it == moduleName }
+    }
 
     when (action) {
       Intent.ACTION_PACKAGE_FULLY_REMOVED -> {
@@ -313,8 +315,6 @@ object VectorService : IDaemonService.Stub() {
     }
 
     // Special handling if the app being changed is the Vector Manager itself.
-    val isRemovedAction =
-        action == Intent.ACTION_PACKAGE_FULLY_REMOVED || action == Intent.ACTION_UID_REMOVED
     if (moduleName == BuildConfig.DEFAULT_MANAGER_PACKAGE_NAME && userId == 0) {
       Log.d(TAG, "Manager updated")
       ConfigCache.updateManager(isRemovedAction)

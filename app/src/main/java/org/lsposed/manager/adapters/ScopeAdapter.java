@@ -454,12 +454,59 @@ public class ScopeAdapter extends EmptyStateRecyclerView.EmptyStateAdapter<Scope
             Intent launchIntent = AppHelper.getLaunchIntentForPackage(appInfo.packageName, userId);
             if (launchIntent == null) {
                 menu.removeItem(R.id.menu_launch);
+            } else {
+                MenuItem menuLaunch = menu.findItem(R.id.menu_launch);
+                if (menuLaunch != null) {
+                    menuLaunch.setOnMenuItemClickListener(i -> {
+                        ConfigManager.startActivityAsUserWithFeature(launchIntent, module.userId);
+                        return true;
+                    });
+                }
             }
             if (system) {
-                menu.findItem(R.id.menu_force_stop).setTitle(R.string.reboot);
+                MenuItem menuForceStop = menu.findItem(R.id.menu_force_stop);
+                if (menuForceStop != null) {
+                    menuForceStop.setTitle(R.string.reboot);
+                    menuForceStop.setOnMenuItemClickListener(i -> {
+                        ConfigManager.reboot();
+                        return true;
+                    });
+                }
                 menu.removeItem(R.id.menu_compile_speed);
                 menu.removeItem(R.id.menu_other_app);
                 menu.removeItem(R.id.menu_app_info);
+            } else {
+                MenuItem menuForceStop = menu.findItem(R.id.menu_force_stop);
+                if (menuForceStop != null) {
+                    menuForceStop.setOnMenuItemClickListener(i -> {
+                        ConfigManager.forceStopPackage(appInfo.packageName, module.userId);
+                        return true;
+                    });
+                }
+                MenuItem menuCompileSpeed = menu.findItem(R.id.menu_compile_speed);
+                if (menuCompileSpeed != null) {
+                    menuCompileSpeed.setOnMenuItemClickListener(i -> {
+                        CompileDialogFragment.speed(fragment.getChildFragmentManager(), appInfo.applicationInfo);
+                        return true;
+                    });
+                }
+                MenuItem menuOtherApp = menu.findItem(R.id.menu_other_app);
+                if (menuOtherApp != null) {
+                    menuOtherApp.setOnMenuItemClickListener(i -> {
+                        var intent = new Intent(Intent.ACTION_SHOW_APP_INFO);
+                        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, appInfo.packageName);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        ConfigManager.startActivityAsUserWithFeature(intent, module.userId);
+                        return true;
+                    });
+                }
+                MenuItem menuAppInfo = menu.findItem(R.id.menu_app_info);
+                if (menuAppInfo != null) {
+                    menuAppInfo.setOnMenuItemClickListener(i -> {
+                        ConfigManager.startActivityAsUserWithFeature(new Intent(ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", appInfo.packageName, null)), module.userId);
+                        return true;
+                    });
+                }
             }
         });
 
@@ -500,6 +547,7 @@ public class ScopeAdapter extends EmptyStateRecyclerView.EmptyStateAdapter<Scope
     public void refresh(boolean force) {
         setLoaded(null, false);
         enabled = moduleUtil.isModuleEnabled(module.packageName);
+        String queryStr = fragment.searchView != null ? fragment.searchView.getQuery().toString() : "";
         fragment.runAsync(() -> {
             List<PackageInfo> appList = AppHelper.getAppList(force);
             var tmpRecList = new HashSet<ApplicationWithEquals>();
@@ -511,8 +559,7 @@ public class ScopeAdapter extends EmptyStateRecyclerView.EmptyStateAdapter<Scope
             appList.parallelStream().forEach(info -> {
                 int userId = info.applicationInfo.uid / App.PER_USER_RANGE;
                 String packageName = info.packageName;
-                if (packageName.equals("system") && userId != 0 ||
-                        packageName.equals(module.packageName) ||
+                if (packageName.equals(module.packageName) ||
                         packageName.equals(BuildConfig.APPLICATION_ID)) {
                     return;
                 }
@@ -523,7 +570,7 @@ public class ScopeAdapter extends EmptyStateRecyclerView.EmptyStateAdapter<Scope
                     installedList.add(application);
                 }
 
-                if (userId != module.userId) {
+                if (!packageName.equals("system") && userId != module.userId) {
                     return;
                 }
 
@@ -549,8 +596,6 @@ public class ScopeAdapter extends EmptyStateRecyclerView.EmptyStateAdapter<Scope
             checkedList = tmpChkList;
             recommendedList = tmpRecList;
             searchList = tmpList.parallelStream().sorted(this::sortApps).collect(Collectors.toList());
-
-            String queryStr = fragment.searchView != null ? fragment.searchView.getQuery().toString() : "";
 
             fragment.runOnUiThread(() -> getFilter().filter(queryStr));
         });
