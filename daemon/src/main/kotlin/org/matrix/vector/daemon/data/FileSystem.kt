@@ -37,6 +37,7 @@ import org.matrix.vector.daemon.BuildConfig
 import org.matrix.vector.daemon.utils.ObfuscationManager
 
 private const val TAG = "VectorFileSystem"
+private const val VECTOR_DATA_CONTEXT = "u:object_r:xposed_data:s0"
 
 object FileSystem {
   val basePath: Path = Paths.get("/data/adb/lspd")
@@ -59,9 +60,14 @@ object FileSystem {
   init {
     runCatching {
           Files.createDirectories(basePath)
-          Os.chmod(basePath.toString(), "700".toInt(8))
-          SELinux.setFileContext(basePath.toString(), "u:object_r:system_file:s0")
           Files.createDirectories(configDirPath)
+          setSelinuxContextRecursive(basePath, VECTOR_DATA_CONTEXT)
+          Os.chmod("/data/adb", "711".toInt(8))
+          Os.chmod(basePath.toString(), "755".toInt(8))
+          Os.chmod(configDirPath.toString(), "777".toInt(8))
+          configDirPath.toFile().listFiles { file -> file.name.startsWith(dbPath.name) }?.forEach {
+            Os.chmod(it.absolutePath, "666".toInt(8))
+          }
         }
         .onFailure { Log.e(TAG, "Failed to initialize directories", it) }
   }
