@@ -92,11 +92,23 @@ jobs:
           name: ${{ steps.prepareArtifact.outputs.zygiskReleaseName }}
           path: "./Vector-Release/*"
 
+      - name: Upload zygisk release zip
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ steps.prepareArtifact.outputs.zygiskReleaseName }}-zip
+          path: "zygisk/release/Vector-v*-Release.zip"
+
       - name: Upload zygisk debug
         uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.prepareArtifact.outputs.zygiskDebugName }}
           path: "./Vector-Debug/*"
+
+      - name: Upload zygisk debug zip
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ steps.prepareArtifact.outputs.zygiskDebugName }}-zip
+          path: "zygisk/release/Vector-v*-Debug.zip"
 
       - name: Upload mappings
         uses: actions/upload-artifact@v6
@@ -111,4 +123,3 @@ jobs:
         with:
           name: symbols
           path: build/symbols
-
