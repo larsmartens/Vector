@@ -4,7 +4,17 @@ MODDIR="${0%/*}"
 
 launch_standalone_manager() {
   if [ -f "$MODDIR/manager.apk" ]; then
-    pm install -r "$MODDIR/manager.apk" >/dev/null 2>&1 || true
+    install_out="$(pm install -r "$MODDIR/manager.apk" 2>&1)" || {
+      case "$install_out" in
+        *INSTALL_FAILED_UPDATE_INCOMPATIBLE*)
+          pm uninstall "$MANAGER_PACKAGE_NAME" >/dev/null 2>&1 || true
+          pm install "$MODDIR/manager.apk" >/dev/null 2>&1 || return 1
+          ;;
+        *)
+          return 1
+          ;;
+      esac
+    }
   fi
 
   if pm path "$MANAGER_PACKAGE_NAME" >/dev/null 2>&1; then
@@ -16,7 +26,8 @@ launch_standalone_manager() {
 }
 
 if [ "$(getprop ro.build.version.sdk)" -ge 36 ]; then
-  launch_standalone_manager && exit 0
+  launch_standalone_manager
+  exit $?
 fi
 
 am start -c "${MANAGER_PACKAGE_NAME}.LAUNCH_MANAGER" "${INJECTED_PACKAGE_NAME}/.BugreportWarningActivity"
