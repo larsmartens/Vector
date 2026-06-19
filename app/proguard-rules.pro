@@ -1,6 +1,14 @@
 -keep class org.lsposed.manager.Constants {
     public static boolean setBinder(android.os.IBinder);
 }
+
+-keep class org.lsposed.manager.App { *; }
+-keep class org.lsposed.manager.ui.activity.** { *; }
+-keep class org.lsposed.manager.service.** { *; }
+-keep class * extends android.app.Activity { *; }
+-keep class * extends android.app.Application { *; }
+-keep class * extends android.app.Service { *; }
+
 -assumenosideeffects class kotlin.jvm.internal.Intrinsics {
     public static void check*(...);
     public static void throw*(...);
