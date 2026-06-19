@@ -18,7 +18,8 @@ launch_standalone_manager() {
   fi
 
   if pm path "$MANAGER_PACKAGE_NAME" >/dev/null 2>&1; then
-    am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -p "$MANAGER_PACKAGE_NAME" >/dev/null 2>&1
+    am start -n "$MANAGER_PACKAGE_NAME/.ui.activity.MainActivity" >/dev/null 2>&1 ||
+      am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -p "$MANAGER_PACKAGE_NAME" >/dev/null 2>&1
     return $?
   fi
 
