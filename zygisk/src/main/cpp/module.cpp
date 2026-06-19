@@ -338,7 +338,11 @@ void VectorModule::postAppSpecialize(const zygisk::AppSpecializeArgs *args) {
     close(dex_fd);  // The FD is duplicated by mmap, we can close it now.
 
     // Initialize ART hooks via the native library.
-    this->InitArtHooker(env_, init_info_);
+    if (!this->InitArtHooker(env_, init_info_)) {
+        LOGE("Skip injection because LSPlant initialization failed.");
+        SetAllowUnload(true);
+        return;
+    }
     // Initialize JNI hooks via the native library.
     this->InitHooks(env_);
     // Find the Java entrypoint.
@@ -425,9 +429,12 @@ void VectorModule::postServerSpecialize(const zygisk::ServerSpecializeArgs *args
     }
     close(dex_fd);
 
+    if (!this->InitArtHooker(env_, init_info_)) {
+        LOGE("Skip injection because LSPlant initialization failed.");
+        SetAllowUnload(true);
+        return;
+    }
     ipc_bridge.HookBridge(env_);
-
-    this->InitArtHooker(env_, init_info_);
     this->InitHooks(env_);
     this->SetupEntryClass(env_);
 

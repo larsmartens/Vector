@@ -33,10 +33,12 @@ Context::PreloadedDex::~PreloadedDex() {
     }
 }
 
-void Context::InitArtHooker(JNIEnv *env, const lsplant::InitInfo &initInfo) {
+bool Context::InitArtHooker(JNIEnv *env, const lsplant::InitInfo &initInfo) {
     if (!lsplant::Init(env, initInfo)) {
         LOGE("Failed to initialize LSPlant hooking framework.");
+        return false;
     }
+    return true;
 }
 
 void Context::InitHooks(JNIEnv *env) {
