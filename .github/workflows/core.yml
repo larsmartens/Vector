@@ -25,6 +25,10 @@ jobs:
           submodules: true
           fetch-depth: 0
 
+      - name: Checkout LSPlant DexBuilder
+        run: |
+          git -C external/lsplant submodule update --init lsplant/src/main/jni/external/dex_builder
+
       - name: Write key
         if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/master' ) || github.ref_type == 'tag' }}
         run: |
