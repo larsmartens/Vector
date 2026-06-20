@@ -16,6 +16,7 @@ import org.matrix.vector.daemon.system.getSystemServiceManager
 
 private const val TAG = "VectorSystemServer"
 private const val ACTION_GET_BINDER = 2
+private const val DIRECT_BRIDGE_SERVICE = "vector"
 
 object SystemServerService : ILSPSystemServerService.Stub(), IBinder.DeathRecipient {
 
@@ -46,15 +47,22 @@ object SystemServerService : ILSPSystemServerService.Stub(), IBinder.DeathRecipi
       runCatching {
             getSystemServiceManager().registerForNotifications(serviceName, callback)
             ServiceManager.addService(serviceName, this)
+            registerDirectBridgeService()
             proxyServiceName = serviceName
           }
           .onFailure { Log.e(TAG, "Failed to register IServiceCallback", it) }
     } else {
       runCatching {
         ServiceManager.addService(serviceName, this)
+        registerDirectBridgeService()
         proxyServiceName = serviceName
       }.onFailure { Log.e(TAG, "Failed to register proxy service", it) }
     }
+  }
+
+  private fun registerDirectBridgeService() {
+    runCatching { ServiceManager.addService(DIRECT_BRIDGE_SERVICE, this) }
+        .onFailure { Log.e(TAG, "Failed to register direct bridge service", it) }
   }
 
   override fun requestApplicationService(
