@@ -384,11 +384,7 @@ void VectorModule::postServerSpecialize(const zygisk::ServerSpecializeArgs *args
 
     LOGD("Attempting injection into system_server.");
 
-    if (GetAndroidSdkInt() >= 36) {
-        LOGE("Skipping system_server injection on Android 16+; app IPC uses the daemon proxy.");
-        SetAllowUnload(true);
-        return;
-    }
+    const bool android16_or_newer = GetAndroidSdkInt() >= 36;
 
     // --- Device-Specific Workaround ---
     // Some ZTE devices require argv[0] to be explicitly set to "system_server"
@@ -446,6 +442,12 @@ void VectorModule::postServerSpecialize(const zygisk::ServerSpecializeArgs *args
     close(dex_fd);
 
     ipc_bridge.HookBridge(env_);
+
+    if (android16_or_newer) {
+        LOGI("Installed system_server IPC bridge only on Android 16+; skipping LSPlant hooks.");
+        SetAllowUnload(false);
+        return;
+    }
 
     if (!this->InitArtHooker(env_, init_info_)) {
         LOGE("Continuing with Vector IPC bridge only because LSPlant initialization failed.");
