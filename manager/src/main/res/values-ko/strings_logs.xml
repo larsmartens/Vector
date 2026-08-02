@@ -14,14 +14,6 @@
     <string name="logs_filter_clear">필터 지우기</string>
     <string name="logs_filter_scanning">화면 밖까지 걸러낼 수 있도록 파일 전체를 읽는 중입니다.</string>
 
-    <string name="logs_level_verbose">상세</string>
-    <string name="logs_level_debug">디버그</string>
-    <string name="logs_level_info">정보</string>
-    <string name="logs_level_warn">경고</string>
-    <string name="logs_level_error">오류</string>
-    <string name="logs_level_fatal">치명적</string>
-    <string name="logs_level_other">기타</string>
-
     <string name="logs_window">%3$d줄 중 %1$d–%2$d줄</string>
     <plurals name="logs_matches">
         <item quantity="other">일치하는 줄 %1$d개</item>
@@ -30,6 +22,9 @@
     <string name="logs_line_truncated">줄 잘림</string>
     <plurals name="logs_frames">
         <item quantity="other">스택 %1$d단</item>
+    </plurals>
+    <plurals name="logs_more_lines">
+        <item quantity="other">%1$d줄 더</item>
     </plurals>
 
     <string name="logs_state_daemon_title">데몬에 연결할 수 없음</string>
@@ -71,6 +66,9 @@
     <string name="logs_source_more">프레임워크 자체의 줄도 포함</string>
     <string name="logs_source_less">모듈의 줄만 표시</string>
     <string name="logs_verbose_summary">버그를 신고하기 전에 켜세요. 앱은 자기 로그를 읽을 수 있으므로, 계속 켜 두면 앱이 Vector를 알아챌 통로가 됩니다.</string>
+    <string name="logs_trace_title">스택 트레이스</string>
+    <string name="logs_traces_inline">트레이스를 제자리에서 열기</string>
+    <string name="logs_traces_inline_summary">스택 트레이스가 해당 줄 아래에 펼쳐집니다. 끄면 별도 화면에서 엽니다.</string>
     <string name="logs_save_summary">두 로그를 원하는 zip에 기록합니다</string>
     <string name="logs_rotate_summary">지금 조각을 닫고 새 조각을 엽니다</string>
     <string name="logs_part">%2$d개 중 %1$d번째 조각</string>

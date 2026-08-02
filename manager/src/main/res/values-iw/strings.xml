@@ -10,6 +10,14 @@
     <string name="nav_store">קטלוג</string>
     <string name="nav_logs">יומנים</string>
 
+    <string name="panels_done">סיום</string>
+    <string name="panels_hide">הסתרת %1$s</string>
+    <string name="panels_show">הצגת %1$s</string>
+    <string name="panels_move_earlier">העברה קדימה</string>
+    <string name="panels_move_later">העברה אחורה</string>
+    <string name="panels_ball_open">פתיחת הניווט</string>
+    <string name="panels_ball_close">סגירת הניווט</string>
+
     <string name="status_active">פעיל</string>
     <string name="status_degraded">דורש בדיקה</string>
     <string name="status_inactive">לא הופעל</string>
@@ -68,15 +76,6 @@
     <string name="home_discussions">דיונים</string>
     <string name="home_review_prs">סקירת שינוי</string>
 
-    <string name="github_sign_in">התחברות ל-GitHub</string>
-    <string name="github_sign_in_why">רשות. מעלה את המגבלה השעתית על עדכוני פעילות, ומאפשר ל-Vector להראות מה מחכה לכם. קריאה בלבד — לא מתבקשות שום הרשאות.</string>
-    <string name="github_sign_in_code">הזינו את הקוד הזה ב-%1$s</string>
-    <string name="github_open_browser">פתיחת דפדפן</string>
-    <string name="github_copy_code">העתקת הקוד</string>
-    <string name="github_signed_in_as">מחוברים בתור %1$s</string>
-    <string name="github_sign_out">התנתקות</string>
-    <string name="github_cancel">ביטול</string>
-    <string name="github_unreachable">לא הייתה גישה ל-GitHub. כל השאר עדיין עובד.</string>
     <string name="home_with_coauthor">%1$s ו-%2$s</string>
     <string name="home_with_coauthors">%1$s ועוד %2$d</string>
 
@@ -100,26 +99,6 @@
         <item quantity="two">יומיים של שקט</item>
         <item quantity="many">%1$d ימי שקט</item>
         <item quantity="other">%1$d ימי שקט</item>
-    </plurals>
-
-    <string name="time_yesterday">אתמול</string>
-    <plurals name="time_days_ago">
-        <item quantity="one">לפני יום</item>
-        <item quantity="two">לפני יומיים</item>
-        <item quantity="many">לפני %1$d ימים</item>
-        <item quantity="other">לפני %1$d ימים</item>
-    </plurals>
-    <plurals name="time_weeks_ago">
-        <item quantity="one">לפני שבוע</item>
-        <item quantity="two">לפני שבועיים</item>
-        <item quantity="many">לפני %1$d שבועות</item>
-        <item quantity="other">לפני %1$d שבועות</item>
-    </plurals>
-    <plurals name="time_months_ago">
-        <item quantity="one">לפני חודש</item>
-        <item quantity="two">לפני חודשיים</item>
-        <item quantity="many">לפני %1$d חודשים</item>
-        <item quantity="other">לפני %1$d חודשים</item>
     </plurals>
 
     <string name="appearance_title">מראה</string>
@@ -159,7 +138,6 @@
     <string name="modules_incompatible_legacy">דורש ממשק Xposed %1$d, שהמסגרת הזאת לא מספקת.</string>
     <string name="modules_api_behind">נבנה עבור libxposed API %1$d. גרסה %2$d שינתה את הממשק, ולכן ייתכן שהמודול לא יעבוד במלואו.</string>
     <string name="modules_no_daemon">‏Vector לא פועל, ולכן רשימת המודולים לא זמינה. פתחו את מצב המערכת מהבית כדי לראות למה.</string>
-    <string name="module_toggle_failed">לא ניתן היה לשנות את %1$s. המסגרת דחתה את השינוי.</string>
 
     <string name="web_open_external">פתיחה בדפדפן</string>
 
@@ -170,8 +148,13 @@
     <string name="ambience_matrix">גשם של קוד</string>
     <string name="ambience_none">דומם</string>
 
+    <string name="settings_navigation">ניווט</string>
+    <string name="settings_floating_nav">ניווט צף</string>
+    <string name="settings_floating_nav_summary">מחליף את הסרגל בכדור קטן שאפשר לגרור לכל מקום. לחיצה ארוכה פורשת את המקטעים במניפה, והקשה משאירה אותם פתוחים.</string>
+    <string name="settings_rearrange_panels">סידור המקטעים מחדש</string>
+    <string name="settings_rearrange_panels_summary">אפשר לשנות את סדרם, או להסתיר את מה שאף פעם לא נפתח.</string>
+
     <string name="settings_activity">זרם הפעילות</string>
-    <string name="settings_window">ההיסטוריה שמוצגת בבית</string>
     <plurals name="settings_window_months">
         <item quantity="one">החודש האחרון</item>
         <item quantity="two">החודשיים האחרונים</item>
@@ -230,7 +213,6 @@
     <string name="action_uninstalled">‏%1$s הוסרה.</string>
     <string name="action_uninstall_failed">לא ניתן היה להסיר את %1$s.</string>
 
-    <string name="settings">הגדרות</string>
     <string name="back">חזרה</string>
     <string name="retry">ניסיון נוסף</string>
 
@@ -284,7 +266,6 @@
     <string name="report_see_guide">המדריך המלא בתקלה</string>
     <string name="report_root_refused">‏root נדחה. אשרו את Vector במנהל ה-root שלכם ונסו שוב%1$s</string>
     <string name="home_custom_build">גרסה עצמאית — מקדימה את master</string>
-    <string name="github_device_code">קוד מכשיר של GitHub</string>
     <string name="language_title">שפה</string>
     <string name="language_system">ברירת המחדל של המערכת</string>
     <string name="language_system_summary">לפי השפה שמוגדרת בטלפון</string>
@@ -311,7 +292,6 @@
     <string name="update_failed_start">לא ניתן היה להפעיל את תוכנית ההתקנה.</string>
     <string name="update_failed_download">לא ניתן היה להוריד את העדכון.</string>
     <string name="update_failed_exit">תוכנית ההתקנה נכשלה (קוד %1$d).</string>
-    <string name="update_available">יש עדכון</string>
     <string name="store_mute_updates">התעלמות מעדכונים של המודול הזה</string>
     <string name="store_mute_updates_summary">הוא יפסיק להיחשב מיושן, כאן וברשימת המודולים</string>
     <string name="store_options">אפשרויות</string>
@@ -410,6 +390,23 @@
     <string name="crash_recorded_title">המנהל נסגר באופן בלתי צפוי</string>
     <string name="crash_recorded_summary">דוח הקריסה המלא נכלל בייצוא היומנים, בתיקייה crash_manager.</string>
     <string name="crash_recorded_clear">מחיקה</string>
+    <string name="crash_what">מה</string>
+    <string name="crash_message">הודעה</string>
+    <string name="crash_where">איפה</string>
+    <string name="crash_when">מתי</string>
+    <string name="crash_where_unknown">בשום מקום בקוד של Vector עצמו</string>
+    <string name="crash_when_value">%1$s ב־%2$s</string>
+    <string name="crash_open_trace">הצגת המעקב</string>
+    <string name="crash_trace">קריסה</string>
+    <string name="crash_caused_by">נגרם על ידי</string>
+    <plurals name="crash_frames_elided">
+        <item quantity="one">מסגרת אחת נוספת, זהה לאלה שלמעלה</item>
+        <item quantity="two">שתי מסגרות נוספות, זהות לאלה שלמעלה</item>
+        <item quantity="many">%1$d מסגרות נוספות, זהות לאלה שלמעלה</item>
+        <item quantity="other">%1$d מסגרות נוספות, זהות לאלה שלמעלה</item>
+    </plurals>
+    <string name="crash_frame_copied">המסגרת הועתקה</string>
+    <string name="crash_unreadable">לא הצלחנו לקרוא את הקריסה הזאת. העתיקו אותה וצרפו אותה לדיווח כמות שהיא.</string>
     <string name="force_launcher_icons">למנוע מאפליקציות להסתיר את הסמל שלהן במסך הבית</string>
     <string name="force_launcher_icons_summary">החל מ-Android 10, אפליקציה שמסתירה את סמל מסך הבית שלה מקבלת סמל חלופי שפותח את פרטי האפליקציה שלה. כבו את האפשרות הזאת כדי לתת לה להישאר מוסתרת — ייתכן שאפליקציית מסך הבית תתעדכן רק לאחר הפעלה מחדש. אפליקציות שמעולם לא היה להן סמל במסך הבית, ובהן רוב המודולים, אינן מושפעות.</string>
     <string name="action_force_stop_failed">לא ניתן היה לעצור את %1$s.</string>

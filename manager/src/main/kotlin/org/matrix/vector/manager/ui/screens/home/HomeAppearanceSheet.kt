@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -25,28 +24,30 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.BrightnessAuto
+import androidx.compose.material.icons.rounded.BubbleChart
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Colorize
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.OpenInBrowser
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Reorder
 import androidx.compose.material.icons.rounded.Waves
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,12 +62,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.matrix.vector.manager.ui.theme.LocalizedOverlay
 import org.matrix.vector.manager.R
 import org.matrix.vector.manager.ui.components.ChoiceRow
+import org.matrix.vector.manager.ui.components.SheetAction
 import org.matrix.vector.manager.ui.components.SheetHeading
 import org.matrix.vector.manager.ui.components.StatusNote
 import org.matrix.vector.manager.ui.components.ToggleRow
@@ -74,6 +75,7 @@ import org.matrix.vector.manager.net.DohStatus
 import org.matrix.vector.manager.di.ServiceLocator
 import org.matrix.vector.manager.ui.components.ColorWheel
 import org.matrix.vector.manager.ui.components.ambience.AmbienceKind
+import org.matrix.vector.manager.ui.navigation.LocalNavigator
 import org.matrix.vector.manager.ui.theme.SeedScheme
 import org.matrix.vector.manager.ui.theme.ThemeMode
 
@@ -86,6 +88,15 @@ import org.matrix.vector.manager.ui.theme.ThemeMode
  * catch-all Settings screen at all: a screen that collects unrelated switches is where preferences
  * go to be forgotten, and every one of them has a place it actually belongs.
  *
+ * The navigation section stretches that rule the furthest and still keeps to it. Where the panels
+ * live is not a property of Home — but neither is the theme, and both answer the same question,
+ * which is what this app looks like. What is deliberately *not* here is the arrangement itself:
+ * panels are reordered on the navigation container, by long-pressing one, because a drag only means
+ * something where you can watch the others move aside. The row below is a way in rather than a
+ * second place to do it, and it has to exist because nothing on Android teaches that a navigation
+ * bar can be long-pressed at all — and with the floating style on, there is no bar left to try it
+ * on.
+ *
  * Everything here takes effect immediately behind the sheet, which is the point of a sheet rather
  * than a screen: change the surface or the theme and you can watch it happen without losing your
  * place.
@@ -94,11 +105,16 @@ import org.matrix.vector.manager.ui.theme.ThemeMode
 @Composable
 fun HomeAppearanceSheet(onDismiss: () -> Unit) {
     val settings = ServiceLocator.settings
+    // Read out here rather than inside the sheet. A ModalBottomSheet is a subcomposition, so the
+    // locals VectorApp provides do reach into it, but the navigator is wanted for one callback and
+    // nothing about it changes between here and there.
+    val navigator = LocalNavigator.current
     val themeMode by settings.themeMode.collectAsStateWithLifecycle()
     val dynamicColor by settings.dynamicColor.collectAsStateWithLifecycle()
     val amoled by settings.amoledBlack.collectAsStateWithLifecycle()
     val seed by settings.seedColor.collectAsStateWithLifecycle()
     val ambience by settings.headerAmbience.collectAsStateWithLifecycle()
+    val floating by settings.floatingNav.collectAsStateWithLifecycle()
     val contributorOrder by settings.contributorOrder.collectAsStateWithLifecycle()
     val resolvedDark =
         when (ThemeMode.from(themeMode)) {
@@ -111,12 +127,12 @@ fun HomeAppearanceSheet(onDismiss: () -> Unit) {
     val doh by settings.dohEnabled.collectAsStateWithLifecycle()
     val dohStatus by ServiceLocator.dns.status.collectAsStateWithLifecycle()
 
-    // The default state, deliberately. `skipPartiallyExpanded` removes the half-height stop, which
-    // is the only thing a drag on a sheet can *do* other than dismiss it, so a sheet taller than
-    // half the screen would open at full height and could not be made smaller. Left alone, Material
-    // adds the stop only when the content is actually taller than half the screen, so short sheets
-    // still open at their own height and nothing gains a useless drag.
-    val sheetState = rememberModalBottomSheetState()
+    // Every value stays enabled, deliberately. Dropping PartiallyExpanded removes the half-height
+    // stop, which is the only thing a drag on a sheet can *do* other than dismiss it, so a sheet
+    // taller than half the screen would open at full height and could not be made smaller. Left
+    // alone, Material caps that stop at the sheet's own height, so short sheets still open at
+    // their own height and nothing gains a useless drag.
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
 LocalizedOverlay {
@@ -198,6 +214,33 @@ LocalizedOverlay {
                     )
                 }
             }
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+
+            SheetHeading(stringResource(R.string.settings_navigation), Icons.Rounded.Dashboard)
+            ToggleRow(
+                title = stringResource(R.string.settings_floating_nav),
+                icon = Icons.Rounded.BubbleChart,
+                subtitle = stringResource(R.string.settings_floating_nav_summary),
+                checked = floating,
+                onCheckedChange = settings::setFloatingNav,
+            )
+            SheetAction(
+                title = stringResource(R.string.settings_rearrange_panels),
+                icon = Icons.Rounded.Reorder,
+                onClick = {
+                    // Edit mode and the dismissal in the one click, and deliberately without
+                    // animating the sheet out first: hiding it through its own sheetState would
+                    // leave this dialog's window, scrim and all, over the container for the length
+                    // of the animation, and the first thing anyone does in edit mode is drag an
+                    // item. Dropping the sheet out of composition takes its window with it in the
+                    // same frame the container enters edit mode, so the first touch that lands
+                    // lands on a panel.
+                    navigator.editingPanels = true
+                    onDismiss()
+                },
+                subtitle = stringResource(R.string.settings_rearrange_panels_summary),
+            )
+
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
             // Here rather than under the Store's filters, where it used to sit. It was never a

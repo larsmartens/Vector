@@ -14,14 +14,6 @@
     <string name="logs_filter_clear">مسح التصفية</string>
     <string name="logs_filter_scanning">تُقرأ كامل الملف كي تتجاوز التصفية ما يظهر على الشاشة.</string>
 
-    <string name="logs_level_verbose">مفصّل</string>
-    <string name="logs_level_debug">تنقيح</string>
-    <string name="logs_level_info">معلومة</string>
-    <string name="logs_level_warn">تحذير</string>
-    <string name="logs_level_error">خطأ</string>
-    <string name="logs_level_fatal">فادح</string>
-    <string name="logs_level_other">أخرى</string>
-
     <string name="logs_window">الأسطر %1$d–%2$d من %3$d</string>
     <plurals name="logs_matches">
         <item quantity="zero">لا أسطر مطابقة</item>
@@ -40,6 +32,14 @@
         <item quantity="few">%1$d إطارات</item>
         <item quantity="many">%1$d إطارًا</item>
         <item quantity="other">%1$d إطار</item>
+    </plurals>
+    <plurals name="logs_more_lines">
+        <item quantity="zero">بلا أسطر أخرى</item>
+        <item quantity="one">سطر آخر</item>
+        <item quantity="two">سطران آخران</item>
+        <item quantity="few">%1$d أسطر أخرى</item>
+        <item quantity="many">%1$d سطرًا آخر</item>
+        <item quantity="other">%1$d سطر آخر</item>
     </plurals>
 
     <string name="logs_state_daemon_title">تعذّر الوصول إلى الخدمة</string>
@@ -81,6 +81,9 @@
     <string name="logs_source_more">تضمين أسطر الإطار نفسه</string>
     <string name="logs_source_less">إظهار أسطر الوحدات فقط</string>
     <string name="logs_verbose_summary">فعّل هذا قبل الإبلاغ عن خلل. تستطيع التطبيقات قراءة سجلاتها، لذا فإبقاؤه مفعّلًا أحد السبل التي يكتشف بها تطبيقٌ وجود Vector.</string>
+    <string name="logs_trace_title">تتبّع المكدّس</string>
+    <string name="logs_traces_inline">فتح التتبّعات في مكانها</string>
+    <string name="logs_traces_inline_summary">يُفتح التتبّع أسفل سطره. أوقف هذا ليُفتح في شاشة مستقلة.</string>
     <string name="logs_save_summary">يكتب السجلين في ملف zip تختاره</string>
     <string name="logs_rotate_summary">يغلق الجزء الحالي ويبدأ جزءًا جديدًا</string>
     <string name="logs_part">الجزء %1$d/%2$d</string>

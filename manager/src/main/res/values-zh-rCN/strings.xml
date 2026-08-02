@@ -6,6 +6,14 @@
     <string name="nav_store">仓库</string>
     <string name="nav_logs">日志</string>
 
+    <string name="panels_done">完成</string>
+    <string name="panels_hide">隐藏%1$s</string>
+    <string name="panels_show">显示%1$s</string>
+    <string name="panels_move_earlier">向前移动</string>
+    <string name="panels_move_later">向后移动</string>
+    <string name="panels_ball_open">打开导航</string>
+    <string name="panels_ball_close">关闭导航</string>
+
     <string name="status_active">已激活</string>
     <string name="status_degraded">异常</string>
     <string name="status_inactive">未激活</string>
@@ -58,15 +66,6 @@
     <string name="home_discussions">讨论区</string>
     <string name="home_review_prs">审阅代码</string>
 
-    <string name="github_sign_in">登录 GitHub</string>
-    <string name="github_sign_in_why">可选。提高动态更新的每小时限额，并让 Vector 显示等待你处理的内容。只读——不申请任何权限。</string>
-    <string name="github_sign_in_code">在 %1$s 输入此代码</string>
-    <string name="github_open_browser">打开浏览器</string>
-    <string name="github_copy_code">复制代码</string>
-    <string name="github_signed_in_as">已登录为 %1$s</string>
-    <string name="github_sign_out">退出登录</string>
-    <string name="github_cancel">取消</string>
-    <string name="github_unreachable">无法连接 GitHub。其余功能仍可正常使用。</string>
     <string name="home_with_coauthor">%1$s 与 %2$s</string>
     <string name="home_with_coauthors">%1$s 等 %2$d 人</string>
 
@@ -81,17 +80,6 @@
     <string name="home_your_build">你的版本 %1$d</string>
     <plurals name="home_quiet_days">
         <item quantity="other">静默 %1$d 天</item>
-    </plurals>
-
-    <string name="time_yesterday">昨天</string>
-    <plurals name="time_days_ago">
-        <item quantity="other">%1$d 天前</item>
-    </plurals>
-    <plurals name="time_weeks_ago">
-        <item quantity="other">%1$d 周前</item>
-    </plurals>
-    <plurals name="time_months_ago">
-        <item quantity="other">%1$d 个月前</item>
     </plurals>
 
     <string name="appearance_title">外观</string>
@@ -131,7 +119,6 @@
     <string name="modules_incompatible_legacy">需要 Xposed API %1$d，本框架未提供该版本。</string>
     <string name="modules_api_behind">针对 libxposed API %1$d 构建。API %2$d 更改了接口，此模块可能无法完全工作。</string>
     <string name="modules_no_daemon">Vector 未运行，因此无法列出模块。请从主页打开系统状态查看原因。</string>
-    <string name="module_toggle_failed">无法更改 %1$s。框架拒绝了此次更改。</string>
 
     <string name="web_open_external">在浏览器中打开</string>
 
@@ -142,8 +129,13 @@
     <string name="ambience_matrix">代码雨</string>
     <string name="ambience_none">静止</string>
 
+    <string name="settings_navigation">导航</string>
+    <string name="settings_floating_nav">悬浮导航</string>
+    <string name="settings_floating_nav_summary">用一颗可以拖到任意位置的小球代替导航栏。按住小球会将面板扇形展开，轻点则让它们保持展开。</string>
+    <string name="settings_rearrange_panels">重新排列面板</string>
+    <string name="settings_rearrange_panels_summary">调整顺序，或隐藏从不打开的面板。</string>
+
     <string name="settings_activity">动态</string>
-    <string name="settings_window">主页显示的历史范围</string>
     <plurals name="settings_window_months">
         <item quantity="other">最近 %1$d 个月</item>
     </plurals>
@@ -199,7 +191,6 @@
     <string name="action_uninstalled">已卸载 %1$s。</string>
     <string name="action_uninstall_failed">无法卸载 %1$s。</string>
 
-    <string name="settings">设置</string>
     <string name="back">返回</string>
     <string name="retry">重试</string>
 
@@ -247,7 +238,6 @@
     <string name="report_see_guide">完整指南见 issue</string>
     <string name="report_root_refused">Root 请求被拒绝。请在你的 Root 管理器中允许 Vector，然后重试%1$s</string>
     <string name="home_custom_build">自定义构建——领先于 master</string>
-    <string name="github_device_code">GitHub 设备代码</string>
 
     <string name="language_title">语言</string>
     <string name="language_system">跟随系统</string>
@@ -275,7 +265,6 @@
     <string name="update_failed_start">无法启动安装程序。</string>
     <string name="update_failed_download">无法下载此更新。</string>
     <string name="update_failed_exit">安装程序失败（退出码 %1$d）。</string>
-    <string name="update_available">有可用更新</string>
     <string name="store_mute_updates">忽略此模块的更新</string>
     <string name="store_mute_updates_summary">在此处与模块列表中都不再计为过期</string>
     <string name="store_options">选项</string>
@@ -374,6 +363,20 @@
     <string name="crash_recorded_title">管理器意外退出</string>
     <string name="crash_recorded_summary">完整的堆栈信息会随日志导出一起保存，位于其中的 crash_manager 文件夹。</string>
     <string name="crash_recorded_clear">丢弃</string>
+    <string name="crash_what">什么</string>
+    <string name="crash_message">消息</string>
+    <string name="crash_where">在哪里</string>
+    <string name="crash_when">何时</string>
+    <string name="crash_where_unknown">不在 Vector 自己的代码中</string>
+    <string name="crash_when_value">%1$s，线程 %2$s</string>
+    <string name="crash_open_trace">查看调用栈</string>
+    <string name="crash_trace">崩溃</string>
+    <string name="crash_caused_by">起因</string>
+    <plurals name="crash_frames_elided">
+        <item quantity="other">还有 %1$d 层调用栈，与上面相同</item>
+    </plurals>
+    <string name="crash_frame_copied">已复制该层调用栈</string>
+    <string name="crash_unreadable">无法读取这次崩溃。请原样复制并附在报告里。</string>
     <string name="force_launcher_icons">阻止应用隐藏自己的桌面图标</string>
     <string name="force_launcher_icons_summary">从 Android 10 起，隐藏了自己桌面图标的应用会被补上一个图标，点击它会打开该应用的应用信息页面。关闭此项可以让它继续保持隐藏——桌面可能要等重启之后才会更新。本来就没有桌面图标的应用不受影响，大多数模块都属于此类。</string>
     <string name="action_force_stop_failed">无法停止 %1$s。</string>

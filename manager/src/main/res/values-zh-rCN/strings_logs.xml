@@ -14,14 +14,6 @@
     <string name="logs_filter_clear">清除筛选</string>
     <string name="logs_filter_scanning">正在读取整个文件，以便筛选能覆盖屏幕之外的内容。</string>
 
-    <string name="logs_level_verbose">详细</string>
-    <string name="logs_level_debug">调试</string>
-    <string name="logs_level_info">信息</string>
-    <string name="logs_level_warn">警告</string>
-    <string name="logs_level_error">错误</string>
-    <string name="logs_level_fatal">致命</string>
-    <string name="logs_level_other">其他</string>
-
     <string name="logs_window">第 %1$d–%2$d 行，共 %3$d 行</string>
     <plurals name="logs_matches">
         <item quantity="other">%1$d 行匹配</item>
@@ -30,6 +22,9 @@
     <string name="logs_line_truncated">此行已截断</string>
     <plurals name="logs_frames">
         <item quantity="other">%1$d 层调用栈</item>
+    </plurals>
+    <plurals name="logs_more_lines">
+        <item quantity="other">还有 %1$d 行</item>
     </plurals>
 
     <string name="logs_state_daemon_title">无法连接到守护进程</string>
@@ -71,6 +66,9 @@
     <string name="logs_source_more">同时显示框架自身的日志</string>
     <string name="logs_source_less">仅显示模块日志</string>
     <string name="logs_verbose_summary">上报问题前请先开启。应用可以读取自己的日志，因此保持开启会让应用有机会发现 Vector。</string>
+    <string name="logs_trace_title">调用栈</string>
+    <string name="logs_traces_inline">就地展开调用栈</string>
+    <string name="logs_traces_inline_summary">调用栈在所属行下方展开。关闭后改为在单独的页面打开。</string>
     <string name="logs_save_summary">把两份日志写入你选择的 zip 文件</string>
     <string name="logs_rotate_summary">关闭当前分段并新建一个</string>
     <string name="logs_part">第 %1$d/%2$d 段</string>

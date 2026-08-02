@@ -14,14 +14,6 @@
     <string name="logs_filter_clear">Effacer le filtre</string>
     <string name="logs_filter_scanning">Lecture du fichier entier pour que le filtre voie au-delà de l\'écran.</string>
 
-    <string name="logs_level_verbose">Verbeux</string>
-    <string name="logs_level_debug">Débogage</string>
-    <string name="logs_level_info">Info</string>
-    <string name="logs_level_warn">Avertissement</string>
-    <string name="logs_level_error">Erreur</string>
-    <string name="logs_level_fatal">Fatal</string>
-    <string name="logs_level_other">Autre</string>
-
     <string name="logs_window">Lignes %1$d–%2$d sur %3$d</string>
     <plurals name="logs_matches">
         <item quantity="one">%1$d ligne correspondante</item>
@@ -32,6 +24,10 @@
     <plurals name="logs_frames">
         <item quantity="one">%1$d trame</item>
         <item quantity="other">%1$d trames</item>
+    </plurals>
+    <plurals name="logs_more_lines">
+        <item quantity="one">%1$d ligne de plus</item>
+        <item quantity="other">%1$d lignes de plus</item>
     </plurals>
 
     <string name="logs_state_daemon_title">Le démon est injoignable</string>
@@ -73,6 +69,9 @@
     <string name="logs_source_more">Inclure les lignes du framework</string>
     <string name="logs_source_less">Afficher seulement les lignes des modules</string>
     <string name="logs_verbose_summary">Activez ceci avant de signaler un bug. Les applications peuvent lire leurs propres journaux : le laisser activé est donc un moyen pour une application de repérer Vector.</string>
+    <string name="logs_trace_title">Trace de pile</string>
+    <string name="logs_traces_inline">Ouvrir les traces sur place</string>
+    <string name="logs_traces_inline_summary">Une trace se déplie sous sa ligne. Désactivez ceci pour l\'ouvrir sur un écran dédié.</string>
     <string name="logs_save_summary">Écrit les deux journaux dans un zip de votre choix</string>
     <string name="logs_rotate_summary">Ferme la partie en cours et en ouvre une neuve</string>
     <string name="logs_part">partie %1$d/%2$d</string>

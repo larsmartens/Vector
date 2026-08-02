@@ -14,14 +14,6 @@
     <string name="logs_filter_clear">Limpar o filtro</string>
     <string name="logs_filter_scanning">Lendo o arquivo inteiro para que o filtro alcance além do que está na tela.</string>
 
-    <string name="logs_level_verbose">Detalhado</string>
-    <string name="logs_level_debug">Depuração</string>
-    <string name="logs_level_info">Info</string>
-    <string name="logs_level_warn">Aviso</string>
-    <string name="logs_level_error">Erro</string>
-    <string name="logs_level_fatal">Fatal</string>
-    <string name="logs_level_other">Outro</string>
-
     <string name="logs_window">Linhas %1$d–%2$d de %3$d</string>
     <plurals name="logs_matches">
         <item quantity="one">%1$d linha correspondente</item>
@@ -32,6 +24,10 @@
     <plurals name="logs_frames">
         <item quantity="one">%1$d quadro</item>
         <item quantity="other">%1$d quadros</item>
+    </plurals>
+    <plurals name="logs_more_lines">
+        <item quantity="one">mais %1$d linha</item>
+        <item quantity="other">mais %1$d linhas</item>
     </plurals>
 
     <string name="logs_state_daemon_title">O daemon está inacessível</string>
@@ -73,6 +69,9 @@
     <string name="logs_source_more">Incluir também as linhas do framework</string>
     <string name="logs_source_less">Mostrar só as linhas dos módulos</string>
     <string name="logs_verbose_summary">Ligue isto antes de relatar um erro. Os apps conseguem ler os próprios registros, então deixar ligado é um jeito de um app perceber o Vector.</string>
+    <string name="logs_trace_title">Rastreamento de pilha</string>
+    <string name="logs_traces_inline">Abrir os rastreamentos no lugar</string>
+    <string name="logs_traces_inline_summary">O rastreamento se abre embaixo da linha dele. Desligue para abri-lo em uma tela própria.</string>
     <string name="logs_save_summary">Grava os dois registros em um zip escolhido por você</string>
     <string name="logs_rotate_summary">Fecha a parte atual e abre uma nova</string>
     <string name="logs_part">parte %1$d/%2$d</string>

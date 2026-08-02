@@ -1,8 +1,5 @@
 package org.matrix.vector.manager.ui.screens.home
-import android.util.Log
-import org.matrix.vector.manager.Constants
 import kotlinx.coroutines.CancellationException
-
 import org.matrix.vector.manager.data.repository.FrameworkUpdateState
 import org.matrix.vector.manager.data.repository.LaunchShortcut
 import org.matrix.vector.manager.data.repository.ManagerInstallStep
@@ -24,10 +21,11 @@ import kotlin.random.Random
 import kotlinx.coroutines.launch
 import org.lsposed.lspd.ILSPManagerService
 import org.matrix.vector.manager.data.github.CommunityFeed
-import org.matrix.vector.manager.data.github.GitHubAuth
 import org.matrix.vector.manager.data.github.GitHubRepository
 import org.matrix.vector.manager.di.ServiceLocator
 import org.matrix.vector.manager.ipc.DaemonClient
+import org.matrix.vector.manager.logE
+import org.matrix.vector.manager.logW
 import org.matrix.vector.manager.ui.components.FrameworkState
 
 /** A specific reason the framework is degraded, so the UI never has to say merely "something". */
@@ -139,29 +137,11 @@ data class DeviceInfo(
 class HomeViewModel(
     private val daemon: DaemonClient,
     private val github: GitHubRepository,
-    private val auth: GitHubAuth,
 ) : ViewModel() {
-
-    val signInState: StateFlow<org.matrix.vector.manager.data.github.SignInState> = auth.state
 
     val openLinksExternally: StateFlow<Boolean> = ServiceLocator.settings.openLinksExternally
 
     val headerAmbience: StateFlow<String> = ServiceLocator.settings.headerAmbience
-
-    val isSignInConfigured: Boolean
-        get() = auth.isConfigured
-
-    fun signIn() {
-        viewModelScope.launch { auth.signIn() }
-    }
-
-    fun signOut() {
-        auth.signOut()
-        // The rate limit changes with the token, so the feed is worth re-reading.
-        refreshFeed(GitHubRepository.Freshness.Force)
-    }
-
-    fun cancelSignIn() = auth.cancel()
 
     private val _status = MutableStateFlow(FrameworkStatus())
     val status: StateFlow<FrameworkStatus> = _status.asStateFlow()
@@ -324,11 +304,7 @@ class HomeViewModel(
             daemon
                 .getXposedVersionCode()
                 .onFailure { e ->
-                    Log.w(
-                        Constants.TAG,
-                        "status: framework version code unavailable, update check skipped",
-                        e,
-                    )
+                    logW("status: framework version code unavailable, update check skipped", e)
                 }
                 .getOrDefault(0L)
         val api = daemon.getXposedApiVersion().getOrNull()
@@ -339,8 +315,7 @@ class HomeViewModel(
         val systemServerResult = daemon.systemServerRequested()
         val healthFailure = sepolicyResult.exceptionOrNull() ?: systemServerResult.exceptionOrNull()
         if (healthFailure != null && healthFailure !is CancellationException) {
-            Log.w(
-                Constants.TAG,
+            logW(
                 "status: framework health read failed, defaulting to sepolicy/system_server " +
                     "not loaded",
                 healthFailure,
@@ -477,13 +452,13 @@ class HomeViewModel(
                     it.copy(notificationEnabled = enabled, notificationKnown = true)
                 }
             }
-            .onFailure { e -> Log.w(Constants.TAG, "status: notification toggle unread", e) }
+            .onFailure { e -> logW("status: notification toggle unread", e) }
         // Read rather than assumed: this one is a global system setting, so anything on the device
         // can have moved it since the manager last wrote it.
         daemon
             .forcedLauncherIcons()
             .onSuccess { _hiddenIcon.value = it }
-            .onFailure { e -> Log.w(Constants.TAG, "status: launcher-icon toggle unread", e) }
+            .onFailure { e -> logW("status: launcher-icon toggle unread", e) }
     }
 
     fun setStatusNotification(enabled: Boolean) {
@@ -501,11 +476,7 @@ class HomeViewModel(
                     }
                 }
                 .onFailure { e ->
-                    Log.e(
-                        Constants.TAG,
-                        "framework: setting the status notification to $enabled failed",
-                        e,
-                    )
+                    logE("framework: setting the status notification to $enabled failed", e)
                 }
         }
     }
@@ -623,7 +594,6 @@ class HomeViewModel(
                     HomeViewModel(
                         ServiceLocator.daemon,
                         ServiceLocator.github,
-                        ServiceLocator.githubAuth,
                     )
                         as T
             }

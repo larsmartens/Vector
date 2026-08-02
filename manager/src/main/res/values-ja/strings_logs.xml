@@ -14,14 +14,6 @@
     <string name="logs_filter_clear">絞り込みを解除</string>
     <string name="logs_filter_scanning">画面の外まで絞り込めるよう、ファイル全体を読み込んでいます。</string>
 
-    <string name="logs_level_verbose">詳細</string>
-    <string name="logs_level_debug">デバッグ</string>
-    <string name="logs_level_info">情報</string>
-    <string name="logs_level_warn">警告</string>
-    <string name="logs_level_error">エラー</string>
-    <string name="logs_level_fatal">致命的</string>
-    <string name="logs_level_other">その他</string>
-
     <string name="logs_window">%3$d 行中 %1$d–%2$d 行</string>
     <plurals name="logs_matches">
         <item quantity="other">一致 %1$d 行</item>
@@ -30,6 +22,9 @@
     <string name="logs_line_truncated">行を省略しました</string>
     <plurals name="logs_frames">
         <item quantity="other">%1$d 段のスタック</item>
+    </plurals>
+    <plurals name="logs_more_lines">
+        <item quantity="other">続きが %1$d 行</item>
     </plurals>
 
     <string name="logs_state_daemon_title">デーモンに接続できません</string>
@@ -71,6 +66,9 @@
     <string name="logs_source_more">フレームワーク自身の行も表示する</string>
     <string name="logs_source_less">モジュールの行だけ表示する</string>
     <string name="logs_verbose_summary">不具合を報告する前に有効にしてください。アプリは自分のログを読めるため、有効のままにしておくとアプリが Vector に気づく手がかりになります。</string>
+    <string name="logs_trace_title">スタックトレース</string>
+    <string name="logs_traces_inline">トレースをその場で開く</string>
+    <string name="logs_traces_inline_summary">スタックトレースはその行の下に展開されます。オフにすると専用の画面で開きます。</string>
     <string name="logs_save_summary">両方のログを、選んだ zip に書き出します</string>
     <string name="logs_rotate_summary">現在の区切りを閉じて新しいものを始めます</string>
     <string name="logs_part">%2$d 分割中 %1$d 番目</string>

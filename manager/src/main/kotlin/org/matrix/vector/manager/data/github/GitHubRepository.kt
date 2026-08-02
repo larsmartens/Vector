@@ -1,6 +1,4 @@
 package org.matrix.vector.manager.data.github
-import android.util.Log
-import org.matrix.vector.manager.Constants
 
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -11,6 +9,8 @@ import kotlinx.serialization.json.Json
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.matrix.vector.manager.logE
+import org.matrix.vector.manager.logW
 
 /**
  * Activity on the project's GitHub repository: the commits, the people behind them, the repository
@@ -23,11 +23,6 @@ import okhttp3.Request
 class GitHubRepository(
     private val client: OkHttpClient,
     cacheDir: File,
-    /**
-     * Supplies the optional sign-in token. Anonymous access is a fully supported mode — this only
-     * ever raises the rate limit from 60 to 5000 requests an hour.
-     */
-    private val tokenProvider: () -> String? = { null },
     /** How far back to reach, in months. User-configurable; see SettingsRepository. */
     private val windowMonthsProvider: () -> Int = { DEFAULT_WINDOW_MONTHS },
 ) {
@@ -136,8 +131,7 @@ class GitHubRepository(
             // Not on the Cached path: a cold OkHttp cache answers FORCE_CACHE with an
             // unsatisfiable 504, and every scroll to the foot of the feed would log.
             if (fresh == null && freshness != Freshness.Cached) {
-                Log.w(
-                    Constants.TAG,
+                logW(
                     "feed: github commit fetch failed ($freshness), falling back to disk",
                     fetched.exceptionOrNull(),
                 )
@@ -158,7 +152,7 @@ class GitHubRepository(
                             json.encodeToString(Snapshot(total, fresh.rawCommits, repo))
                         )
                     }
-                    .onFailure { e -> Log.w(Constants.TAG, "feed: snapshot write failed", e) }
+                    .onFailure { e -> logW("feed: snapshot write failed", e) }
                 return@withContext build(
                     timeline(fresh.rawCommits, windowStart),
                     repo,
@@ -360,11 +354,7 @@ class GitHubRepository(
                 // means the next call tries again rather than declaring the archive finished
                 // because GitHub was rate limiting at the time.
                 if (batch == null) {
-                    Log.w(
-                        Constants.TAG,
-                        "feed: history backfill $url unavailable",
-                        result.exceptionOrNull(),
-                    )
+                    logW("feed: history backfill $url unavailable", result.exceptionOrNull())
                     return@repeat
                 }
 
@@ -463,7 +453,6 @@ class GitHubRepository(
             Request.Builder()
                 .url("$API/$REPO/commits?per_page=1")
                 .header("Accept", "application/vnd.github+json")
-                .apply { tokenProvider()?.let { header("Authorization", "Bearer $it") } }
                 .build()
         client.newCall(request).execute().use { response ->
             val link = response.header("Link") ?: return 0L
@@ -488,7 +477,6 @@ class GitHubRepository(
                 .url(url)
                 .header("Accept", "application/vnd.github+json")
                 .header("X-GitHub-Api-Version", "2022-11-28")
-                .apply { tokenProvider()?.let { header("Authorization", "Bearer $it") } }
                 .apply {
                     // OkHttp replays the stored ETag as If-None-Match on its own. A 304 costs
                     // nothing against GitHub's 60/hour budget, so revalidation stays cheap.
@@ -713,7 +701,7 @@ class GitHubRepository(
      */
     private fun releaseListJson(freshness: Freshness): String? =
         runCatching { get("$API/$REPO/releases?per_page=$CANARY_FETCH", freshness) }
-            .onFailure { e -> Log.w(Constants.TAG, "update: github release list unavailable", e) }
+            .onFailure { e -> logW("update: github release list unavailable", e) }
             .getOrNull()
 
     /**
@@ -734,7 +722,7 @@ class GitHubRepository(
             val body = releaseListJson(freshness) ?: return@withContext emptyList()
 
             runCatching { json.decodeFromString<List<GhRelease>>(body) }
-                .onFailure { e -> Log.e(Constants.TAG, "update: canary release list unreadable", e) }
+                .onFailure { e -> logE("update: canary release list unreadable", e) }
                 .getOrDefault(emptyList())
                 .filter { it.prerelease && it.tagName.startsWith(CANARY_TAG_PREFIX) }
                 .take(CANARY_KEEP)
@@ -775,7 +763,7 @@ class GitHubRepository(
             val body = releaseListJson(freshness) ?: return@withContext emptyList()
 
             runCatching { json.decodeFromString<List<GhRelease>>(body) }
-                .onFailure { e -> Log.e(Constants.TAG, "update: release list unreadable", e) }
+                .onFailure { e -> logE("update: release list unreadable", e) }
                 .getOrDefault(emptyList())
                 .mapNotNull { release ->
                     val canary = release.prerelease && release.tagName.startsWith(CANARY_TAG_PREFIX)
@@ -934,14 +922,7 @@ class GitHubRepository(
         const val ISSUES_URL = "$REPO_URL/issues"
         const val PULLS_URL = "$REPO_URL/pulls"
         const val DISCUSSIONS_URL = "$REPO_URL/discussions"
-        const val GOOD_FIRST_ISSUE_URL = "$REPO_URL/issues?q=is%3Aopen+label%3A%22good+first+issue%22"
 
-        /**
-         * The workflow's own run list, filtered to master.
-         *
-         * The way out of the app for anyone who wants a build log, or a commit older than the five
-         * canaries CI keeps published. [canaryBuilds] itself reads prereleases, not this page.
-         */
         /**
          * The Actions page, filtered the way the project README's build badge filters it.
          *

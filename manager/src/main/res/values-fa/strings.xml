@@ -6,6 +6,14 @@
     <string name="nav_store">فهرست</string>
     <string name="nav_logs">گزارش‌ها</string>
 
+    <string name="panels_done">انجام شد</string>
+    <string name="panels_hide">پنهان کردن %1$s</string>
+    <string name="panels_show">نمایش %1$s</string>
+    <string name="panels_move_earlier">انتقال به جلو</string>
+    <string name="panels_move_later">انتقال به عقب</string>
+    <string name="panels_ball_open">باز کردن ناوبری</string>
+    <string name="panels_ball_close">بستن ناوبری</string>
+
     <string name="status_active">فعال</string>
     <string name="status_degraded">نیازمند توجه</string>
     <string name="status_inactive">فعال نشده</string>
@@ -60,15 +68,6 @@
     <string name="home_discussions">گفتگوها</string>
     <string name="home_review_prs">بازبینی یک تغییر</string>
 
-    <string name="github_sign_in">ورود به GitHub</string>
-    <string name="github_sign_in_why">اختیاری. سقف ساعتی به‌روزرسانی فعالیت را بالا می‌برد و به Vector اجازه می‌دهد آنچه چشم‌به‌راه شماست را نشان دهد. فقط‌خواندنی — هیچ اجازه‌ای درخواست نمی‌شود.</string>
-    <string name="github_sign_in_code">این کد را در %1$s وارد کنید</string>
-    <string name="github_open_browser">باز کردن مرورگر</string>
-    <string name="github_copy_code">رونوشت کد</string>
-    <string name="github_signed_in_as">واردشده با نام %1$s</string>
-    <string name="github_sign_out">خروج</string>
-    <string name="github_cancel">انصراف</string>
-    <string name="github_unreachable">دسترسی به GitHub ممکن نشد. باقی چیزها همچنان کار می‌کنند.</string>
     <string name="home_with_coauthor">%1$s و %2$s</string>
     <string name="home_with_coauthors">%1$s و %2$d نفر دیگر</string>
 
@@ -86,20 +85,6 @@
     <plurals name="home_quiet_days">
         <item quantity="one">%1$d روز آرامش</item>
         <item quantity="other">%1$d روز آرامش</item>
-    </plurals>
-
-    <string name="time_yesterday">دیروز</string>
-    <plurals name="time_days_ago">
-        <item quantity="one">%1$d روز پیش</item>
-        <item quantity="other">%1$d روز پیش</item>
-    </plurals>
-    <plurals name="time_weeks_ago">
-        <item quantity="one">%1$d هفته پیش</item>
-        <item quantity="other">%1$d هفته پیش</item>
-    </plurals>
-    <plurals name="time_months_ago">
-        <item quantity="one">%1$d ماه پیش</item>
-        <item quantity="other">%1$d ماه پیش</item>
     </plurals>
 
     <string name="appearance_title">ظاهر</string>
@@ -139,7 +124,6 @@
     <string name="modules_incompatible_legacy">به واسط Xposed %1$d نیاز دارد که این چارچوب فراهم نمی‌کند.</string>
     <string name="modules_api_behind">برای libxposed API %1$d ساخته شده است. API %2$d رابط را تغییر داد، پس ممکن است این ماژول کامل کار نکند.</string>
     <string name="modules_no_daemon">‏Vector در حال اجرا نیست، پس فهرست ماژول‌ها در دسترس نیست. برای دیدن علت، وضعیت سامانه را از خانه باز کنید.</string>
-    <string name="module_toggle_failed">تغییر %1$s ممکن نشد. چارچوب این تغییر را نپذیرفت.</string>
 
     <string name="web_open_external">باز کردن در مرورگر</string>
 
@@ -150,8 +134,13 @@
     <string name="ambience_matrix">باران کد</string>
     <string name="ambience_none">ساکن</string>
 
+    <string name="settings_navigation">ناوبری</string>
+    <string name="settings_floating_nav">ناوبری شناور</string>
+    <string name="settings_floating_nav_summary">نوار را با توپ کوچکی جایگزین می‌کند که می‌توانید هرجا بکشید. برای بادبزنی شدن بخش‌ها آن را نگه دارید، یا برای باز ماندنشان ضربه بزنید.</string>
+    <string name="settings_rearrange_panels">چیدمان دوبارهٔ بخش‌ها</string>
+    <string name="settings_rearrange_panels_summary">ترتیبشان را تغییر دهید، یا آن‌هایی را که هرگز باز نمی‌کنید پنهان کنید.</string>
+
     <string name="settings_activity">جریان فعالیت</string>
-    <string name="settings_window">تاریخچهٔ نمایش‌داده‌شده در خانه</string>
     <plurals name="settings_window_months">
         <item quantity="one">%1$d ماه اخیر</item>
         <item quantity="other">%1$d ماه اخیر</item>
@@ -208,7 +197,6 @@
     <string name="action_uninstalled">‏%1$s حذف شد.</string>
     <string name="action_uninstall_failed">حذف %1$s ممکن نشد.</string>
 
-    <string name="settings">تنظیمات</string>
     <string name="back">بازگشت</string>
     <string name="retry">تلاش دوباره</string>
 
@@ -258,7 +246,6 @@
     <string name="report_see_guide">راهنمای کامل در همان مسئله</string>
     <string name="report_root_refused">روت رد شد. در مدیر روت خود به Vector اجازه دهید و دوباره تلاش کنید%1$s</string>
     <string name="home_custom_build">ساخت شخصی — جلوتر از master</string>
-    <string name="github_device_code">کد دستگاه GitHub</string>
     <string name="language_title">زبان</string>
     <string name="language_system">پیش‌فرض سامانه</string>
     <string name="language_system_summary">هماهنگ با زبانی که روی گوشی تنظیم شده است</string>
@@ -285,7 +272,6 @@
     <string name="update_failed_start">نصب‌کننده اجرا نشد.</string>
     <string name="update_failed_download">به‌روزرسانی بارگیری نشد.</string>
     <string name="update_failed_exit">نصب‌کننده شکست خورد (کد %1$d).</string>
-    <string name="update_available">به‌روزرسانی موجود است</string>
     <string name="store_mute_updates">نادیده گرفتن به‌روزرسانی‌های این ماژول</string>
     <string name="store_mute_updates_summary">دیگر نه اینجا و نه در فهرست ماژول‌ها قدیمی شمرده نمی‌شود</string>
     <string name="store_options">گزینه‌ها</string>
@@ -384,6 +370,21 @@
     <string name="crash_recorded_title">مدیر به‌طور غیرمنتظره بسته شد</string>
     <string name="crash_recorded_summary">رد کامل خطا در خروجی گزارش‌ها، درون پوشهٔ crash_manager، گنجانده می‌شود.</string>
     <string name="crash_recorded_clear">دور انداختن</string>
+    <string name="crash_what">چه</string>
+    <string name="crash_message">پیام</string>
+    <string name="crash_where">کجا</string>
+    <string name="crash_when">چه زمانی</string>
+    <string name="crash_where_unknown">در هیچ‌جای کد خود Vector</string>
+    <string name="crash_when_value">%1$s در %2$s</string>
+    <string name="crash_open_trace">دیدن رد خطا</string>
+    <string name="crash_trace">خرابی</string>
+    <string name="crash_caused_by">ناشی از</string>
+    <plurals name="crash_frames_elided">
+        <item quantity="one">%1$d قاب دیگر، مانند بالا</item>
+        <item quantity="other">%1$d قاب دیگر، مانند بالا</item>
+    </plurals>
+    <string name="crash_frame_copied">قاب رونوشت شد</string>
+    <string name="crash_unreadable">این خرابی خوانده نشد. آن را همان‌گونه که هست رونوشت کنید و به گزارش پیوست کنید.</string>
     <string name="force_launcher_icons">جلوگیری از پنهان کردن نماد برنامه‌ها در لانچر</string>
     <string name="force_launcher_icons_summary">از Android 10 به بعد، برنامه‌ای که نماد خود را در لانچر پنهان می‌کند، نمادی جایگزین می‌گیرد که صفحهٔ اطلاعات برنامه را باز می‌کند. این را خاموش کنید تا پنهان بماند — شاید لانچر شما تا راه‌اندازی دوبارهٔ خودش به‌روز نشود. برنامه‌هایی که هرگز نماد لانچر نداشته‌اند، از جمله بیشتر ماژول‌ها، تحت تأثیر قرار نمی‌گیرند.</string>
     <string name="action_force_stop_failed">توقف %1$s ممکن نشد.</string>

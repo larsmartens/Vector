@@ -14,14 +14,6 @@
     <string name="logs_filter_clear">Xoá bộ lọc</string>
     <string name="logs_filter_scanning">Đang đọc toàn bộ tệp để bộ lọc thấy được cả phần ngoài màn hình.</string>
 
-    <string name="logs_level_verbose">Chi tiết</string>
-    <string name="logs_level_debug">Gỡ lỗi</string>
-    <string name="logs_level_info">Thông tin</string>
-    <string name="logs_level_warn">Cảnh báo</string>
-    <string name="logs_level_error">Lỗi</string>
-    <string name="logs_level_fatal">Nghiêm trọng</string>
-    <string name="logs_level_other">Khác</string>
-
     <string name="logs_window">Dòng %1$d–%2$d trên %3$d</string>
     <plurals name="logs_matches">
         <item quantity="other">%1$d dòng khớp</item>
@@ -30,6 +22,9 @@
     <string name="logs_line_truncated">dòng bị cắt</string>
     <plurals name="logs_frames">
         <item quantity="other">%1$d khung</item>
+    </plurals>
+    <plurals name="logs_more_lines">
+        <item quantity="other">thêm %1$d dòng nữa</item>
     </plurals>
 
     <string name="logs_state_daemon_title">Không liên lạc được tiến trình nền</string>
@@ -71,6 +66,9 @@
     <string name="logs_source_more">Kèm cả các dòng của framework</string>
     <string name="logs_source_less">Chỉ hiện các dòng của mô-đun</string>
     <string name="logs_verbose_summary">Hãy bật trước khi báo lỗi. Ứng dụng đọc được nhật ký của chính nó, nên để bật lâu dài là một cách để ứng dụng nhận ra Vector.</string>
+    <string name="logs_trace_title">Vết ngăn xếp</string>
+    <string name="logs_traces_inline">Mở vết lỗi tại chỗ</string>
+    <string name="logs_traces_inline_summary">Vết lỗi bung ra ngay dưới dòng của nó. Tắt mục này để mở nó trên màn hình riêng.</string>
     <string name="logs_save_summary">Ghi cả hai nhật ký vào tệp zip bạn chọn</string>
     <string name="logs_rotate_summary">Đóng phần hiện tại và mở một phần mới</string>
     <string name="logs_part">phần %1$d/%2$d</string>

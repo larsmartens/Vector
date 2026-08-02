@@ -6,6 +6,14 @@
     <string name="nav_store">Catalogo</string>
     <string name="nav_logs">Log</string>
 
+    <string name="panels_done">Fatto</string>
+    <string name="panels_hide">Nascondi %1$s</string>
+    <string name="panels_show">Mostra %1$s</string>
+    <string name="panels_move_earlier">Sposta prima</string>
+    <string name="panels_move_later">Sposta dopo</string>
+    <string name="panels_ball_open">Apri la navigazione</string>
+    <string name="panels_ball_close">Chiudi la navigazione</string>
+
     <string name="status_active">Attivo</string>
     <string name="status_degraded">Da verificare</string>
     <string name="status_inactive">Non attivato</string>
@@ -60,15 +68,6 @@
     <string name="home_discussions">Discussioni</string>
     <string name="home_review_prs">Rivedi una modifica</string>
 
-    <string name="github_sign_in">Accedi a GitHub</string>
-    <string name="github_sign_in_why">Facoltativo. Alza il limite orario degli aggiornamenti di attività e permette a Vector di mostrare cosa ti sta aspettando. Sola lettura — non viene chiesto alcun permesso.</string>
-    <string name="github_sign_in_code">Inserisci questo codice su %1$s</string>
-    <string name="github_open_browser">Apri il browser</string>
-    <string name="github_copy_code">Copia il codice</string>
-    <string name="github_signed_in_as">Connesso come %1$s</string>
-    <string name="github_sign_out">Disconnetti</string>
-    <string name="github_cancel">Annulla</string>
-    <string name="github_unreachable">GitHub non era raggiungibile. Tutto il resto funziona lo stesso.</string>
     <string name="home_with_coauthor">%1$s e %2$s</string>
     <string name="home_with_coauthors">%1$s e altri %2$d</string>
 
@@ -86,20 +85,6 @@
     <plurals name="home_quiet_days">
         <item quantity="one">%1$d giorno di calma</item>
         <item quantity="other">%1$d giorni di calma</item>
-    </plurals>
-
-    <string name="time_yesterday">ieri</string>
-    <plurals name="time_days_ago">
-        <item quantity="one">%1$d giorno fa</item>
-        <item quantity="other">%1$d giorni fa</item>
-    </plurals>
-    <plurals name="time_weeks_ago">
-        <item quantity="one">%1$d settimana fa</item>
-        <item quantity="other">%1$d settimane fa</item>
-    </plurals>
-    <plurals name="time_months_ago">
-        <item quantity="one">%1$d mese fa</item>
-        <item quantity="other">%1$d mesi fa</item>
     </plurals>
 
     <string name="appearance_title">Aspetto</string>
@@ -139,7 +124,6 @@
     <string name="modules_incompatible_legacy">Richiede l\'API Xposed %1$d, che questo framework non fornisce.</string>
     <string name="modules_api_behind">Compilato per l’API libxposed %1$d. L’API %2$d ha cambiato l’interfaccia, quindi questo modulo potrebbe non funzionare del tutto.</string>
     <string name="modules_no_daemon">Vector non è in esecuzione, quindi l\'elenco dei moduli non è disponibile. Apri lo stato del sistema dalla Home per vedere perché.</string>
-    <string name="module_toggle_failed">Impossibile modificare %1$s. Il framework ha rifiutato la modifica.</string>
 
     <string name="web_open_external">Apri nel browser</string>
 
@@ -150,8 +134,13 @@
     <string name="ambience_matrix">Pioggia di codice</string>
     <string name="ambience_none">Ferma</string>
 
+    <string name="settings_navigation">Navigazione</string>
+    <string name="settings_floating_nav">Navigazione fluttuante</string>
+    <string name="settings_floating_nav_summary">Sostituisce la barra con una pallina che puoi trascinare dove vuoi. Tienila premuta per aprire a ventaglio le sezioni, o toccala per lasciarle aperte.</string>
+    <string name="settings_rearrange_panels">Riordina le sezioni</string>
+    <string name="settings_rearrange_panels_summary">Cambia il loro ordine, o nascondi quelle che non apri mai.</string>
+
     <string name="settings_activity">Attività</string>
-    <string name="settings_window">Cronologia mostrata nella Home</string>
     <plurals name="settings_window_months">
         <item quantity="one">Ultimo %1$d mese</item>
         <item quantity="other">Ultimi %1$d mesi</item>
@@ -208,7 +197,6 @@
     <string name="action_uninstalled">%1$s disinstallata.</string>
     <string name="action_uninstall_failed">Impossibile disinstallare %1$s.</string>
 
-    <string name="settings">Impostazioni</string>
     <string name="back">Indietro</string>
     <string name="retry">Riprova</string>
 
@@ -258,7 +246,6 @@
     <string name="report_see_guide">Guida completa nella issue</string>
     <string name="report_root_refused">Root negato. Autorizza Vector nel tuo gestore root, poi riprova%1$s</string>
     <string name="home_custom_build">Build personalizzata — avanti rispetto a master</string>
-    <string name="github_device_code">Codice dispositivo GitHub</string>
     <string name="language_title">Lingua</string>
     <string name="language_system">Predefinita di sistema</string>
     <string name="language_system_summary">Segui la lingua impostata sul telefono</string>
@@ -285,7 +272,6 @@
     <string name="update_failed_start">Non è stato possibile avviare il programma di installazione.</string>
     <string name="update_failed_download">Non è stato possibile scaricare l\'aggiornamento.</string>
     <string name="update_failed_exit">Il programma di installazione è fallito (codice %1$d).</string>
-    <string name="update_available">Aggiornamento disponibile</string>
     <string name="store_mute_updates">Ignora gli aggiornamenti di questo modulo</string>
     <string name="store_mute_updates_summary">Smette di contare come non aggiornato, qui e nell\'elenco dei moduli</string>
     <string name="store_options">Opzioni</string>
@@ -384,6 +370,21 @@
     <string name="crash_recorded_title">Il gestore si è chiuso in modo imprevisto</string>
     <string name="crash_recorded_summary">La traccia completa viaggia nello zip dei log, nella cartella crash_manager.</string>
     <string name="crash_recorded_clear">Scarta</string>
+    <string name="crash_what">Cosa</string>
+    <string name="crash_message">Messaggio</string>
+    <string name="crash_where">Dove</string>
+    <string name="crash_when">Quando</string>
+    <string name="crash_where_unknown">In nessun punto del codice di Vector</string>
+    <string name="crash_when_value">%1$s su %2$s</string>
+    <string name="crash_open_trace">Vedi la traccia</string>
+    <string name="crash_trace">Arresto</string>
+    <string name="crash_caused_by">Causato da</string>
+    <plurals name="crash_frames_elided">
+        <item quantity="one">%1$d frame in più, uguale a sopra</item>
+        <item quantity="other">%1$d frame in più, uguali a sopra</item>
+    </plurals>
+    <string name="crash_frame_copied">Frame copiato</string>
+    <string name="crash_unreadable">Non è stato possibile leggere questo arresto. Copialo e allegalo al report così com\'è.</string>
     <string name="force_launcher_icons">Impedisci alle app di nascondere la loro icona nel launcher</string>
     <string name="force_launcher_icons_summary">Da Android 10, un\'app che nasconde la propria icona nel launcher ne riceve una che apre la sua pagina Info app. Disattiva questa opzione per lasciarla nascosta — il tuo launcher potrebbe non accorgersene finché non si riavvia. Le app che non hanno mai avuto un\'icona nel launcher, inclusa la maggior parte dei moduli, non sono interessate.</string>
     <string name="action_force_stop_failed">Impossibile arrestare %1$s.</string>

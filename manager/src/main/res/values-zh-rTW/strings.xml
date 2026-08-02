@@ -6,6 +6,14 @@
     <string name="nav_store">儲存庫</string>
     <string name="nav_logs">日誌</string>
 
+    <string name="panels_done">完成</string>
+    <string name="panels_hide">隱藏%1$s</string>
+    <string name="panels_show">顯示%1$s</string>
+    <string name="panels_move_earlier">向前移動</string>
+    <string name="panels_move_later">向後移動</string>
+    <string name="panels_ball_open">開啟導覽</string>
+    <string name="panels_ball_close">關閉導覽</string>
+
     <string name="status_active">已啟用</string>
     <string name="status_degraded">異常</string>
     <string name="status_inactive">未啟用</string>
@@ -58,15 +66,6 @@
     <string name="home_discussions">討論區</string>
     <string name="home_review_prs">審閱變更</string>
 
-    <string name="github_sign_in">登入 GitHub</string>
-    <string name="github_sign_in_why">選用。可提高動態更新的每小時上限，並讓 Vector 顯示等待你處理的項目。唯讀——不要求任何權限。</string>
-    <string name="github_sign_in_code">在 %1$s 輸入此代碼</string>
-    <string name="github_open_browser">開啟瀏覽器</string>
-    <string name="github_copy_code">複製代碼</string>
-    <string name="github_signed_in_as">已以 %1$s 登入</string>
-    <string name="github_sign_out">登出</string>
-    <string name="github_cancel">取消</string>
-    <string name="github_unreachable">無法連線 GitHub。其餘功能仍可正常使用。</string>
     <string name="home_with_coauthor">%1$s 與 %2$s</string>
     <string name="home_with_coauthors">%1$s 等 %2$d 人</string>
 
@@ -81,17 +80,6 @@
     <string name="home_your_build">你的版本 %1$d</string>
     <plurals name="home_quiet_days">
         <item quantity="other">靜默 %1$d 天</item>
-    </plurals>
-
-    <string name="time_yesterday">昨天</string>
-    <plurals name="time_days_ago">
-        <item quantity="other">%1$d 天前</item>
-    </plurals>
-    <plurals name="time_weeks_ago">
-        <item quantity="other">%1$d 週前</item>
-    </plurals>
-    <plurals name="time_months_ago">
-        <item quantity="other">%1$d 個月前</item>
     </plurals>
 
     <string name="appearance_title">外觀</string>
@@ -131,7 +119,6 @@
     <string name="modules_incompatible_legacy">需要 Xposed API %1$d，本框架未提供該版本。</string>
     <string name="modules_api_behind">針對 libxposed API %1$d 建置。API %2$d 變更了介面，此模組可能無法完全運作。</string>
     <string name="modules_no_daemon">Vector 未執行，因此無法列出模組。請從主畫面開啟系統狀態以查看原因。</string>
-    <string name="module_toggle_failed">無法變更 %1$s。框架拒絕了這次變更。</string>
 
     <string name="web_open_external">在瀏覽器中開啟</string>
 
@@ -142,8 +129,13 @@
     <string name="ambience_matrix">程式碼雨</string>
     <string name="ambience_none">靜止</string>
 
+    <string name="settings_navigation">導覽</string>
+    <string name="settings_floating_nav">懸浮導覽</string>
+    <string name="settings_floating_nav_summary">用一顆可以拖到任意位置的小球取代導覽列。按住小球會將面板呈扇形展開，輕觸則讓它們保持展開。</string>
+    <string name="settings_rearrange_panels">重新排列面板</string>
+    <string name="settings_rearrange_panels_summary">調整順序，或隱藏從不開啟的面板。</string>
+
     <string name="settings_activity">動態</string>
-    <string name="settings_window">主畫面顯示的歷史範圍</string>
     <plurals name="settings_window_months">
         <item quantity="other">最近 %1$d 個月</item>
     </plurals>
@@ -199,7 +191,6 @@
     <string name="action_uninstalled">已解除安裝 %1$s。</string>
     <string name="action_uninstall_failed">無法解除安裝 %1$s。</string>
 
-    <string name="settings">設定</string>
     <string name="back">返回</string>
     <string name="retry">重試</string>
 
@@ -247,7 +238,6 @@
     <string name="report_see_guide">完整指南見 issue</string>
     <string name="report_root_refused">Root 要求遭拒。請在你的 Root 管理器中允許 Vector，然後重試%1$s</string>
     <string name="home_custom_build">自訂建置——領先於 master</string>
-    <string name="github_device_code">GitHub 裝置代碼</string>
 
     <string name="language_title">語言</string>
     <string name="language_system">跟隨系統</string>
@@ -275,7 +265,6 @@
     <string name="update_failed_start">無法啟動安裝程式。</string>
     <string name="update_failed_download">無法下載此更新。</string>
     <string name="update_failed_exit">安裝程式失敗（結束碼 %1$d）。</string>
-    <string name="update_available">有可用更新</string>
     <string name="store_mute_updates">忽略此模組的更新</string>
     <string name="store_mute_updates_summary">在此處與模組列表中都不再計為過期</string>
     <string name="store_options">選項</string>
@@ -374,6 +363,20 @@
     <string name="crash_recorded_title">管理器意外結束</string>
     <string name="crash_recorded_summary">完整的堆疊追蹤會隨日誌匯出一起保存，位於其中的 crash_manager 資料夾。</string>
     <string name="crash_recorded_clear">捨棄</string>
+    <string name="crash_what">什麼</string>
+    <string name="crash_message">訊息</string>
+    <string name="crash_where">在哪裡</string>
+    <string name="crash_when">何時</string>
+    <string name="crash_where_unknown">不在 Vector 自己的程式碼中</string>
+    <string name="crash_when_value">%1$s，執行緒 %2$s</string>
+    <string name="crash_open_trace">查看呼叫堆疊</string>
+    <string name="crash_trace">當機</string>
+    <string name="crash_caused_by">起因</string>
+    <plurals name="crash_frames_elided">
+        <item quantity="other">還有 %1$d 層呼叫堆疊，與上面相同</item>
+    </plurals>
+    <string name="crash_frame_copied">已複製該層呼叫堆疊</string>
+    <string name="crash_unreadable">無法讀取這次當機。請原樣複製並附在回報中。</string>
     <string name="force_launcher_icons">阻止應用程式隱藏自己的啟動器圖示</string>
     <string name="force_launcher_icons_summary">自 Android 10 起，隱藏了自己啟動器圖示的應用程式會被補上一個圖示，點按它會開啟該應用程式的應用程式資訊頁面。關閉此項可讓它維持隱藏——你的啟動器可能要等重新啟動之後才會更新。本來就沒有啟動器圖示的應用程式不受影響，大多數模組都屬於此類。</string>
     <string name="action_force_stop_failed">無法停止 %1$s。</string>

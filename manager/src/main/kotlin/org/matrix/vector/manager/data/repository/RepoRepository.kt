@@ -1,18 +1,11 @@
 package org.matrix.vector.manager.data.repository
 
-import android.content.pm.PackageInfo
-import android.os.Build
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.google.gson.stream.JsonReader
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,12 +16,14 @@ import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import org.matrix.vector.manager.Constants
 import org.matrix.vector.manager.data.model.OnlineModule
 import org.matrix.vector.manager.data.model.RepoVersion
 import org.matrix.vector.manager.data.model.StoreCatalog
+import org.matrix.vector.manager.data.model.versionCodeCompat
 import org.matrix.vector.manager.di.ServiceLocator
 import org.matrix.vector.manager.ipc.DaemonClient
+import org.matrix.vector.manager.logI
+import org.matrix.vector.manager.logW
 
 /**
  * The Store's data: the online catalogue, and what this device already has of it.
@@ -180,12 +175,12 @@ class RepoRepository(
             daemon
                 .getInstalledPackagesFromAllUsers(0, false)
                 .onFailure { e ->
-                    Log.w(Constants.TAG, "store: installed versions unavailable", e)
+                    logW("store: installed versions unavailable", e)
                 }
                 .getOrNull() ?: return
         val versions = HashMap<String, RepoVersion>(packages.size)
         for (info in packages) {
-            val version = RepoVersion(info.longVersionCodeCompat(), info.versionName.orEmpty())
+            val version = RepoVersion(info.versionCodeCompat, info.versionName.orEmpty())
             // The daemon reports every user, so the same package arrives more than once. The
             // highest version wins, because that is the one an update would have to beat.
             val known = versions[info.packageName]
@@ -206,13 +201,13 @@ class RepoRepository(
                     // The FORCE_CACHE replay synthesises 504 without contacting the mirror, so
                     // only report a status the network actually produced.
                     if (response.networkResponse != null) {
-                        Log.w(Constants.TAG, "store: $url returned HTTP ${response.code}")
+                        logW("store: $url returned HTTP ${response.code}")
                     }
                     return null
                 }
                 val parsed = parseCatalog(response)
                 if (parsed.isEmpty()) return null
-                Log.i(Constants.TAG, "store: ${parsed.size} modules from $url")
+                logI("store: ${parsed.size} modules from $url")
                 // `fromCache` is deliberately *not* derived from `response.networkResponse`. A hit
                 // inside the ten-minute freshness window is served from disk without touching the
                 // network, and calling that "the saved catalogue" would put an offline notice on
@@ -225,7 +220,7 @@ class RepoRepository(
                 )
             }
         } catch (e: Exception) {
-            Log.w(Constants.TAG, "store: $url unavailable", e)
+            logW("store: $url unavailable", e)
             null
         }
     }
@@ -242,7 +237,7 @@ class RepoRepository(
                 gson.fromJson(response.body.string(), OnlineModule::class.java)
             }
         } catch (e: Exception) {
-            Log.w(Constants.TAG, "store: $url unavailable", e)
+            logW("store: $url unavailable", e)
             null
         }
     }
@@ -275,7 +270,7 @@ class RepoRepository(
             }
             reader.endArray()
         }
-        if (rejected > 0) Log.w(Constants.TAG, "store: skipped $rejected unreadable entries")
+        if (rejected > 0) logW("store: skipped $rejected unreadable entries")
         return modules
     }
 
@@ -294,11 +289,6 @@ class RepoRepository(
             .filter { !it.releases.isNullOrEmpty() }
             .distinctBy { it.name }
             .toList()
-
-    @Suppress("DEPRECATION")
-    private fun PackageInfo.longVersionCodeCompat(): Long =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) longVersionCode
-        else versionCode.toLong()
 
     private companion object {
         /**

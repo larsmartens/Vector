@@ -1,8 +1,4 @@
 package org.matrix.vector.manager.ui.screens.report
-import android.util.Log
-import org.matrix.vector.manager.Constants
-import kotlinx.coroutines.CancellationException
-
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,7 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Folder
-import androidx.compose.material.icons.rounded.OpenInNew
+import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.Science
 import androidx.compose.material.icons.rounded.Terminal
@@ -49,12 +45,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.matrix.vector.manager.R
 import org.matrix.vector.manager.data.github.GitHubRepository
 import org.matrix.vector.manager.di.ServiceLocator
+import org.matrix.vector.manager.logE
 import org.matrix.vector.manager.ui.components.SnackbarTone
 import org.matrix.vector.manager.ui.components.VectorSnackbarHost
 import org.matrix.vector.manager.ui.components.show
@@ -108,7 +106,7 @@ fun TroubleshootScreen(
                             }
                             .onFailure { e ->
                                 if (e is CancellationException) throw e
-                                Log.e(Constants.TAG, "report: saving the log archive failed", e)
+                                logE("report: saving the log archive failed", e)
                             }
                             .isSuccess
                     }
@@ -171,7 +169,7 @@ fun TroubleshootScreen(
 
             item {
                 Step(
-                    icon = Icons.Rounded.OpenInNew,
+                    icon = Icons.AutoMirrored.Rounded.OpenInNew,
                     title = stringResource(R.string.report_step_zygisk),
                     body = stringResource(R.string.report_step_zygisk_body),
                     titleAction = {

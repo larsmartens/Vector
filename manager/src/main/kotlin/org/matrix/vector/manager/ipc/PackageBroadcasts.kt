@@ -4,14 +4,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import org.matrix.vector.manager.BuildConfig
-import org.matrix.vector.manager.Constants
+import org.matrix.vector.manager.logW
 import org.matrix.vector.manager.data.model.PER_USER_RANGE
 
 sealed class PackageEvent {
@@ -106,7 +105,7 @@ fun Context.daemonPackageEventsFlow(): Flow<PackageEvent> = callbackFlow {
                 val event =
                     runCatching { intent.daemonPackageEvent() }
                         .onFailure {
-                            Log.w(Constants.TAG, "ipc: unreadable package notification", it)
+                            logW("ipc: unreadable package notification", it)
                         }
                         .getOrNull()
                 if (event != null) trySend(event)
@@ -133,7 +132,7 @@ fun Context.daemonPackageEventsFlow(): Flow<PackageEvent> = callbackFlow {
             // Throwing here would fail this flow, and the merge it is collected in would take the
             // platform source down with it — losing every user's package events, on a scope whose
             // failure ends the process, to save the one this flow adds.
-            .onFailure { Log.w(Constants.TAG, "ipc: daemon package notifications unavailable", it) }
+            .onFailure { logW("ipc: daemon package notifications unavailable", it) }
             .isSuccess
 
     awaitClose { if (registered) unregisterReceiver(receiver) }
@@ -144,14 +143,14 @@ fun Context.daemonPackageEventsFlow(): Flow<PackageEvent> = callbackFlow {
  *
  * Not one of these extras can be read with the accessor its name implies, which is worth knowing
  * before someone corrects it: the package arrives as a single `String` under
- * [Intent.EXTRA_PACKAGES], whose documented type is `String[]`, so `getStringArrayExtra` answers
- * null, and the user arrives as a plain `Int` under [Intent.EXTRA_USER], whose documented type is
+ * [EXTRA_PACKAGES], whose documented type is `String[]`, so `getStringArrayExtra` answers null, and
+ * the user arrives as a plain `Int` under [Intent.EXTRA_USER], whose documented type is
  * `UserHandle`, so `getParcelableExtra` answers null and the id quietly becomes 0 — the one user
  * this whole flow exists to see past. What the platform sent is wrapped whole under
  * [Intent.EXTRA_INTENT], and only its action says what happened.
  */
 private fun Intent.daemonPackageEvent(): PackageEvent? {
-    val packageName = getStringExtra(Intent.EXTRA_PACKAGES) ?: return null
+    val packageName = getStringExtra(EXTRA_PACKAGES) ?: return null
     val userId = getIntExtra(Intent.EXTRA_USER, 0)
     val wrapped = IntentCompat.getParcelableExtra(this, Intent.EXTRA_INTENT, Intent::class.java)
 
@@ -189,3 +188,12 @@ private const val ACTION_DAEMON_NOTIFICATION = "${BuildConfig.MANAGER_PACKAGE_NA
  * plain int under `EXTRA_USER`, so [daemonPackageEvent] reads that key and not this one.
  */
 private const val EXTRA_USER_HANDLE = "android.intent.extra.user_handle"
+
+/**
+ * `Intent.EXTRA_PACKAGES`, which is only public API from 34.
+ *
+ * This app runs from 27, where the constant does not exist to be referenced — and there is nothing
+ * to reference it for: the daemon writes this key as a literal of its own, so the two sides agree
+ * on the string and never on the symbol.
+ */
+private const val EXTRA_PACKAGES = "android.intent.extra.PACKAGES"

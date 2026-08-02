@@ -14,14 +14,6 @@
     <string name="logs_filter_clear">Rimuovi il filtro</string>
     <string name="logs_filter_scanning">Lettura dell\'intero file, così il filtro vede oltre quello che c\'è sullo schermo.</string>
 
-    <string name="logs_level_verbose">Dettagliato</string>
-    <string name="logs_level_debug">Debug</string>
-    <string name="logs_level_info">Info</string>
-    <string name="logs_level_warn">Avviso</string>
-    <string name="logs_level_error">Errore</string>
-    <string name="logs_level_fatal">Fatale</string>
-    <string name="logs_level_other">Altro</string>
-
     <string name="logs_window">Righe %1$d–%2$d di %3$d</string>
     <plurals name="logs_matches">
         <item quantity="one">%1$d riga corrispondente</item>
@@ -32,6 +24,10 @@
     <plurals name="logs_frames">
         <item quantity="one">%1$d frame</item>
         <item quantity="other">%1$d frame</item>
+    </plurals>
+    <plurals name="logs_more_lines">
+        <item quantity="one">%1$d riga in più</item>
+        <item quantity="other">%1$d righe in più</item>
     </plurals>
 
     <string name="logs_state_daemon_title">Il daemon non è raggiungibile</string>
@@ -73,6 +69,9 @@
     <string name="logs_source_more">Includi anche le righe del framework</string>
     <string name="logs_source_less">Mostra solo le righe dei moduli</string>
     <string name="logs_verbose_summary">Attivala prima di segnalare un bug. Le app possono leggere i propri log, quindi lasciarla attiva è un modo in cui un\'app può accorgersi di Vector.</string>
+    <string name="logs_trace_title">Stack trace</string>
+    <string name="logs_traces_inline">Apri le tracce sul posto</string>
+    <string name="logs_traces_inline_summary">Una traccia si apre sotto la sua riga. Disattivalo per aprirla invece su una schermata dedicata.</string>
     <string name="logs_save_summary">Scrive entrambi i log in uno zip che scegli tu</string>
     <string name="logs_rotate_summary">Chiude la parte attuale e ne apre una nuova</string>
     <string name="logs_part">parte %1$d/%2$d</string>

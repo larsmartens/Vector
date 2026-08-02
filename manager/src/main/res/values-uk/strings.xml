@@ -6,6 +6,14 @@
     <string name="nav_store">Каталог</string>
     <string name="nav_logs">Журнали</string>
 
+    <string name="panels_done">Готово</string>
+    <string name="panels_hide">Сховати «%1$s»</string>
+    <string name="panels_show">Показати «%1$s»</string>
+    <string name="panels_move_earlier">Перемістити вперед</string>
+    <string name="panels_move_later">Перемістити назад</string>
+    <string name="panels_ball_open">Відкрити навігацію</string>
+    <string name="panels_ball_close">Закрити навігацію</string>
+
     <string name="status_active">Активний</string>
     <string name="status_degraded">Проблеми</string>
     <string name="status_inactive">Не активовано</string>
@@ -64,15 +72,6 @@
     <string name="home_discussions">Обговорення</string>
     <string name="home_review_prs">Переглянути зміну</string>
 
-    <string name="github_sign_in">Увійти в GitHub</string>
-    <string name="github_sign_in_why">Необов\'язково. Підвищує погодинний ліміт на оновлення активності й дає Vector змогу показувати те, що чекає на вас. Лише читання — жодних дозволів не запитується.</string>
-    <string name="github_sign_in_code">Введіть цей код на %1$s</string>
-    <string name="github_open_browser">Відкрити браузер</string>
-    <string name="github_copy_code">Копіювати код</string>
-    <string name="github_signed_in_as">Ви ввійшли як %1$s</string>
-    <string name="github_sign_out">Вийти</string>
-    <string name="github_cancel">Скасувати</string>
-    <string name="github_unreachable">GitHub недоступний. Решта працює як звичайно.</string>
     <string name="home_with_coauthor">%1$s і %2$s</string>
     <string name="home_with_coauthors">%1$s і ще %2$d</string>
 
@@ -96,26 +95,6 @@
         <item quantity="few">%1$d дні тиші</item>
         <item quantity="many">%1$d днів тиші</item>
         <item quantity="other">%1$d дня тиші</item>
-    </plurals>
-
-    <string name="time_yesterday">учора</string>
-    <plurals name="time_days_ago">
-        <item quantity="one">%1$d день тому</item>
-        <item quantity="few">%1$d дні тому</item>
-        <item quantity="many">%1$d днів тому</item>
-        <item quantity="other">%1$d дня тому</item>
-    </plurals>
-    <plurals name="time_weeks_ago">
-        <item quantity="one">%1$d тиждень тому</item>
-        <item quantity="few">%1$d тижні тому</item>
-        <item quantity="many">%1$d тижнів тому</item>
-        <item quantity="other">%1$d тижня тому</item>
-    </plurals>
-    <plurals name="time_months_ago">
-        <item quantity="one">%1$d місяць тому</item>
-        <item quantity="few">%1$d місяці тому</item>
-        <item quantity="many">%1$d місяців тому</item>
-        <item quantity="other">%1$d місяця тому</item>
     </plurals>
 
     <string name="appearance_title">Вигляд</string>
@@ -155,7 +134,6 @@
     <string name="modules_incompatible_legacy">Потрібен Xposed API %1$d, якого цей фреймворк не надає.</string>
     <string name="modules_api_behind">Зібрано під libxposed API %1$d. В API %2$d інтерфейс змінився, тож модуль може працювати не повністю.</string>
     <string name="modules_no_daemon">Vector не працює, тож перелік модулів недоступний. Відкрийте стан системи з головної, щоб побачити причину.</string>
-    <string name="module_toggle_failed">Не вдалося змінити %1$s. Фреймворк відхилив зміну.</string>
 
     <string name="web_open_external">Відкрити в браузері</string>
 
@@ -166,8 +144,13 @@
     <string name="ambience_matrix">Дощ із коду</string>
     <string name="ambience_none">Нерухома</string>
 
+    <string name="settings_navigation">Навігація</string>
+    <string name="settings_floating_nav">Плаваюча навігація</string>
+    <string name="settings_floating_nav_summary">Замінює панель навігації маленькою кулькою, яку можна перетягнути будь-куди. Утримуйте її, щоб розгорнути розділи віялом, або торкніться, щоб вони лишилися відкритими.</string>
+    <string name="settings_rearrange_panels">Змінити порядок розділів</string>
+    <string name="settings_rearrange_panels_summary">Змініть їхній порядок або сховайте ті, які ніколи не відкриваєте.</string>
+
     <string name="settings_activity">Стрічка активності</string>
-    <string name="settings_window">Історія на головній</string>
     <plurals name="settings_window_months">
         <item quantity="one">Останній %1$d місяць</item>
         <item quantity="few">Останні %1$d місяці</item>
@@ -226,7 +209,6 @@
     <string name="action_uninstalled">%1$s видалено.</string>
     <string name="action_uninstall_failed">Не вдалося видалити %1$s.</string>
 
-    <string name="settings">Налаштування</string>
     <string name="back">Назад</string>
     <string name="retry">Повторити</string>
 
@@ -280,7 +262,6 @@
     <string name="report_see_guide">Повний посібник у задачі</string>
     <string name="report_root_refused">Root відхилено. Дозвольте Vector у своєму root-менеджері й спробуйте ще раз%1$s</string>
     <string name="home_custom_build">Власна збірка — попереду master</string>
-    <string name="github_device_code">Код пристрою GitHub</string>
     <string name="language_title">Мова</string>
     <string name="language_system">Як у системі</string>
     <string name="language_system_summary">Використовувати мову, налаштовану на телефоні</string>
@@ -307,7 +288,6 @@
     <string name="update_failed_start">Не вдалося запустити встановлювач.</string>
     <string name="update_failed_download">Не вдалося завантажити оновлення.</string>
     <string name="update_failed_exit">Встановлювач завершився помилкою (код %1$d).</string>
-    <string name="update_available">Є оновлення</string>
     <string name="store_mute_updates">Ігнорувати оновлення цього модуля</string>
     <string name="store_mute_updates_summary">Він перестане рахуватися застарілим — і тут, і в переліку модулів</string>
     <string name="store_options">Параметри</string>
@@ -406,6 +386,23 @@
     <string name="crash_recorded_title">Менеджер несподівано завершив роботу</string>
     <string name="crash_recorded_summary">Повне трасування стека потрапляє в експорт журналів, у теку crash_manager.</string>
     <string name="crash_recorded_clear">Відкинути</string>
+    <string name="crash_what">Що</string>
+    <string name="crash_message">Повідомлення</string>
+    <string name="crash_where">Де</string>
+    <string name="crash_when">Коли</string>
+    <string name="crash_where_unknown">Ніде у власному коді Vector</string>
+    <string name="crash_when_value">%1$s у потоці %2$s</string>
+    <string name="crash_open_trace">Переглянути трасування</string>
+    <string name="crash_trace">Збій</string>
+    <string name="crash_caused_by">Причина</string>
+    <plurals name="crash_frames_elided">
+        <item quantity="one">ще %1$d кадр, такий самий, як вище</item>
+        <item quantity="few">ще %1$d кадри, такі самі, як вище</item>
+        <item quantity="many">ще %1$d кадрів, таких самих, як вище</item>
+        <item quantity="other">ще %1$d кадра, такі самі, як вище</item>
+    </plurals>
+    <string name="crash_frame_copied">Кадр скопійовано</string>
+    <string name="crash_unreadable">Цей збій не вдалося прочитати. Скопіюйте його та додайте до звіту як є.</string>
     <string name="force_launcher_icons">Не дозволяти застосункам ховати свій значок у лаунчері</string>
     <string name="force_launcher_icons_summary">Починаючи з Android 10, застосунок, який ховає свій значок у лаунчері, отримує його назад, і цей значок відкриває сторінку відомостей про застосунок. Вимкніть це, щоб значок лишався прихованим — лаунчер може оновити свій перелік лише після перезапуску. Застосунків, які ніколи не мали значка в лаунчері, зокрема більшість модулів, це не стосується.</string>
     <string name="action_force_stop_failed">Не вдалося зупинити %1$s.</string>

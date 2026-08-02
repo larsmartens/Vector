@@ -14,14 +14,6 @@
     <string name="logs_filter_clear">پاک کردن پالایه</string>
     <string name="logs_filter_scanning">کل پرونده خوانده می‌شود تا پالایه فراتر از آنچه روی نمایشگر است را ببیند.</string>
 
-    <string name="logs_level_verbose">پرگو</string>
-    <string name="logs_level_debug">اشکال‌زدایی</string>
-    <string name="logs_level_info">اطلاع</string>
-    <string name="logs_level_warn">هشدار</string>
-    <string name="logs_level_error">خطا</string>
-    <string name="logs_level_fatal">مرگبار</string>
-    <string name="logs_level_other">دیگر</string>
-
     <string name="logs_window">سطرهای %1$d–%2$d از %3$d</string>
     <plurals name="logs_matches">
         <item quantity="one">%1$d سطر هم‌خوان</item>
@@ -32,6 +24,10 @@
     <plurals name="logs_frames">
         <item quantity="one">%1$d قاب</item>
         <item quantity="other">%1$d قاب</item>
+    </plurals>
+    <plurals name="logs_more_lines">
+        <item quantity="one">%1$d سطر دیگر</item>
+        <item quantity="other">%1$d سطر دیگر</item>
     </plurals>
 
     <string name="logs_state_daemon_title">سرویس در دسترس نیست</string>
@@ -73,6 +69,9 @@
     <string name="logs_source_more">سطرهای خودِ چارچوب هم نشان داده شود</string>
     <string name="logs_source_less">تنها سطرهای ماژول‌ها</string>
     <string name="logs_verbose_summary">پیش از گزارش اشکال این را روشن کنید. برنامه‌ها می‌توانند گزارش خودشان را بخوانند، پس روشن ماندنش یکی از راه‌هایی است که یک برنامه می‌تواند Vector را تشخیص دهد.</string>
+    <string name="logs_trace_title">رد پشته</string>
+    <string name="logs_traces_inline">باز کردن رد خطا در همان‌جا</string>
+    <string name="logs_traces_inline_summary">رد خطا زیر سطر خودش باز می‌شود. این را خاموش کنید تا در صفحه‌ای جداگانه باز شود.</string>
     <string name="logs_save_summary">هر دو گزارش را در zip دلخواه شما می‌نویسد</string>
     <string name="logs_rotate_summary">بخش کنونی را می‌بندد و بخشی تازه می‌گشاید</string>
     <string name="logs_part">بخش %1$d/%2$d</string>
