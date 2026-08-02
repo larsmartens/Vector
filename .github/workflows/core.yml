@@ -10,12 +10,6 @@ on:
 
 jobs:
   build:
-    # A "Release Vector …" commit is cut straight to a `v*` tag, and the tag build below is what
-    # publishes it — as the stable, `--latest` release. Skip the master-push run for that one commit
-    # so the very same code does not also go out as a canary prerelease: a release must reach users
-    # once, as the stable release, never also as a canary. The tag build is a separate push event
-    # (ref refs/tags/v*, not refs/heads/master) and is unaffected, so the release still ships.
-    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/master' && startsWith(github.event.head_commit.message, 'Release Vector')) }}
     runs-on: ubuntu-latest
     env:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
@@ -55,11 +49,12 @@ jobs:
           echo 'android.native.buildOutput=verbose' >> ~/.gradle/gradle.properties
           echo 'org.gradle.parallel=true' >> ~/.gradle/gradle.properties
           echo 'org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8 -XX:+UseParallelGC' >> ~/.gradle/gradle.properties
+          echo 'android.native.buildOutput=verbose' >> ~/.gradle/gradle.properties
 
       - name: Setup ninja
         uses: seanmiddleditch/gha-setup-ninja@v6
         with:
-          version: 1.13.2
+          version: 1.12.1
 
       - name: Setup ccache
         uses: actions/cache@v5
