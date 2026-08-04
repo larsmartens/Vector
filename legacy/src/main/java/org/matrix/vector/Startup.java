@@ -1,7 +1,7 @@
 package org.matrix.vector;
 
-import org.lsposed.lspd.service.ILSPApplicationService;
-import org.lsposed.lspd.util.Utils;
+import org.matrix.vector.ipc.IFrameworkService;
+import org.matrix.vector.util.Utils;
 import org.matrix.vector.impl.core.VectorStartup;
 import org.matrix.vector.impl.di.VectorBootstrap;
 import org.matrix.vector.legacy.LegacyDelegateImpl;
@@ -20,7 +20,7 @@ public class Startup {
         }
     }
 
-    public static void initXposed(boolean isSystem, String processName, String appDir, ILSPApplicationService service) {
+    public static void initXposed(boolean isSystem, String processName, String appDir, IFrameworkService service) {
         // Establish the Dependency Injection contract
         VectorBootstrap.INSTANCE.init(new LegacyDelegateImpl());
 

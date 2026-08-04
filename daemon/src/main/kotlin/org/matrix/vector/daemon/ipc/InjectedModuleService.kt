@@ -8,8 +8,8 @@ import android.util.Log
 import io.github.libxposed.service.IXposedService
 import java.io.Serializable
 import java.util.concurrent.ConcurrentHashMap
-import org.lsposed.lspd.service.ILSPInjectedModuleService
-import org.lsposed.lspd.service.IRemotePreferenceCallback
+import org.matrix.vector.ipc.IModuleService
+import org.matrix.vector.ipc.IRemotePreferenceCallback
 import org.matrix.vector.daemon.data.ConfigCache
 import org.matrix.vector.daemon.data.FileSystem
 import org.matrix.vector.daemon.data.PreferenceStore
@@ -17,7 +17,14 @@ import org.matrix.vector.daemon.system.PER_USER_RANGE
 
 private const val TAG = "VectorInjectedModuleService"
 
-class InjectedModuleService(private val packageName: String) : ILSPInjectedModuleService.Stub() {
+/**
+ * A module's service as an **injected process** sees it — this project's `IModuleService`.
+ *
+ * The counterpart to [ModuleAppService], and see `IModuleService.aidl` for why the two differ: this
+ * side may only read the module's remote files, because the process holding it runs as the app it
+ * was injected into rather than as the module.
+ */
+class InjectedModuleService(private val packageName: String) : IModuleService.Stub() {
 
   // Tracks active RemotePreferenceCallbacks linked by config group. Preferences are stored per
   // Android user, so a registration is only interested in updates made by its own user.
@@ -66,7 +73,7 @@ class InjectedModuleService(private val packageName: String) : ILSPInjectedModul
         .getOrNull()
   }
 
-  override fun getRemoteFileList(): Array<String> {
+  override fun getRemoteFileNames(): Array<String> {
     val userId = Binder.getCallingUid() / PER_USER_RANGE
     return runCatching {
           val dir = FileSystem.resolveModuleDir(packageName, "files", userId, -1)
@@ -75,12 +82,12 @@ class InjectedModuleService(private val packageName: String) : ILSPInjectedModul
         .getOrElse { throw RemoteException(it.message) }
   }
 
-  // Called by ModuleService when the module app has changed the group for one Android user.
+  // Called by ModuleAppService when the module app has changed the group for one Android user.
   fun onUpdateRemotePreferences(group: String, userId: Int, diff: Bundle) {
     val groupCallbacks = callbacks[group] ?: return
     for (subscriber in groupCallbacks) {
       if (subscriber.userId != userId) continue
-      runCatching { subscriber.callback.onUpdate(diff) }
+      runCatching { subscriber.callback.onRemotePreferencesChanged(diff) }
           .onFailure { groupCallbacks.remove(subscriber) }
     }
   }

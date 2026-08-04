@@ -34,7 +34,7 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
-import org.lsposed.lspd.models.PreLoadedApk
+import org.matrix.vector.ipc.ModuleCode
 import org.matrix.vector.daemon.BuildConfig
 import org.matrix.vector.daemon.utils.ObfuscationManager
 
@@ -52,7 +52,7 @@ private const val VECTOR_DATA_CONTEXT = "u:object_r:xposed_data:s0"
  */
 sealed interface ModuleLoad {
   /** Parsed, and ready to hand to a forking process. */
-  data class Loaded(val apk: PreLoadedApk) : ModuleLoad
+  data class Loaded(val apk: ModuleCode) : ModuleLoad
 
   /** Declares libxposed API 100, and carries nothing else this framework can load. */
   data object UnsupportedApi : ModuleLoad
@@ -62,7 +62,7 @@ sealed interface ModuleLoad {
 }
 
 /** The APK when it loaded and null when it did not, for callers with nothing to say about why. */
-val ModuleLoad.apkOrNull: PreLoadedApk?
+val ModuleLoad.apkOrNull: ModuleCode?
   get() = (this as? ModuleLoad.Loaded)?.apk
 
 object FileSystem {
@@ -240,12 +240,14 @@ object FileSystem {
     val file = File(apkPath)
     if (!file.exists()) return ModuleLoad.Unusable
 
-    val preLoadedApk = PreLoadedApk()
+    val preLoadedApk = ModuleCode()
     val preLoadedDexes = mutableListOf<SharedMemory>()
     val moduleClassNames = mutableListOf<String>()
     val moduleLibraryNames = mutableListOf<String>()
     var isLegacy = false
     var exceptionPassthrough = false
+    var targetApiVersion = 0
+    var autoHotReload = false
 
     runCatching {
           ZipFile(file).use { zip ->
@@ -264,7 +266,9 @@ object FileSystem {
                   }
                 }
 
-            val targetApi = props.getProperty("targetApiVersion")?.trim()?.toIntOrNull() ?: 0
+            val targetApi = leadingInt(props.getProperty("targetApiVersion"))
+            targetApiVersion = targetApi
+            autoHotReload = props.getProperty("autoHotReload")?.trim().toBoolean()
             // The module-wide mode ExceptionMode.DEFAULT resolves to. Anything that is not
             // "passthrough" - absent, misspelled, or an explicit "protective" - keeps the
             // protective default the API specifies.
@@ -348,6 +352,8 @@ object FileSystem {
       this.moduleLibraryNames = moduleLibraryNames
       this.legacy = isLegacy
       this.exceptionPassthrough = exceptionPassthrough
+      this.targetApiVersion = targetApiVersion
+      this.autoHotReload = autoHotReload
     }
 
     return ModuleLoad.Loaded(preLoadedApk)
@@ -393,7 +399,7 @@ object FileSystem {
   fun getPreloadDex(obfuscate: Boolean): SharedMemory? {
     if (preloadDex == null) {
       runCatching {
-            FileInputStream("framework/lspd.dex").use { preloadDex = readDex(it, obfuscate) }
+            FileInputStream("framework/vector.dex").use { preloadDex = readDex(it, obfuscate) }
           }
           .onFailure { Log.e(TAG, "Failed to load framework dex", it) }
     }
@@ -608,10 +614,10 @@ object FileSystem {
                     os.write("${scope.processName}/${scope.uid}\n".toByteArray())
                     modules.forEach { mod ->
                       os.write("\t${mod.packageName}\n".toByteArray())
-                      mod.file?.moduleClassNames?.forEach { cn ->
+                      mod.code?.moduleClassNames?.forEach { cn ->
                         os.write("\t\t$cn\n".toByteArray())
                       }
-                      mod.file?.moduleLibraryNames?.forEach { ln ->
+                      mod.code?.moduleLibraryNames?.forEach { ln ->
                         os.write("\t\t$ln\n".toByteArray())
                       }
                     }
@@ -675,4 +681,8 @@ object FileSystem {
     createLogDirPath()
     return logDirPath.resolve(getNewLogFileName("modules")).toFile()
   }
+
+  // Matches the manager's leading-integer parsing, including values such as "101.0".
+  private fun leadingInt(value: String?): Int =
+      value?.trim()?.takeWhile { it.isDigit() }?.toIntOrNull() ?: 0
 }

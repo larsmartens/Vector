@@ -76,7 +76,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
-import org.lsposed.lspd.ILSPManagerService
+import org.matrix.vector.ipc.IFrameworkInstallReceiver
 import org.matrix.vector.manager.R
 import org.matrix.vector.manager.data.repository.FlashStep
 import org.matrix.vector.manager.ui.screens.repo.StoreHtmlPane
@@ -102,7 +102,7 @@ fun FrameworkUpdateScreen(
     viewModel: FrameworkUpdateViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
 ) {
     // Before the list has loaded, which is the point: the pin is a number, and it is resolved
-    // against the history whenever that arrives.
+    // against the catalogue whenever that arrives.
     LaunchedEffect(openOnVersionCode) { openOnVersionCode?.let(viewModel::select) }
     val update by viewModel.update.collectAsStateWithLifecycle()
     val flash by viewModel.flash.collectAsStateWithLifecycle()
@@ -110,6 +110,7 @@ fun FrameworkUpdateScreen(
     val chosenZip by viewModel.chosenZip.collectAsStateWithLifecycle()
     val root by viewModel.root.collectAsStateWithLifecycle()
     val selected by viewModel.selected.collectAsStateWithLifecycle()
+    val history by viewModel.history.collectAsStateWithLifecycle()
     val direction by viewModel.direction.collectAsStateWithLifecycle()
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var versionsOpen by remember { mutableStateOf(false) }
@@ -120,7 +121,7 @@ fun FrameworkUpdateScreen(
 
     if (versionsOpen) {
         VersionsSheet(
-            history = update.history,
+            history = history,
             update = update,
             selected = selected,
             onSelect = viewModel::select,
@@ -160,7 +161,7 @@ fun FrameworkUpdateScreen(
                     }
                 },
                 actions = {
-                    if (update.history.size > 1) {
+                    if (history.size > 1) {
                         IconButton(onClick = { versionsOpen = true }) {
                             Icon(
                                 Icons.Rounded.History,
@@ -479,9 +480,11 @@ private fun UpdateBar(
 @Composable
 private fun failureText(code: Int): String =
     when (code) {
-        ILSPManagerService.INSTALL_NO_ROOT -> stringResource(R.string.update_no_root)
-        ILSPManagerService.INSTALL_NOT_EXECUTED -> stringResource(R.string.update_failed_start)
-        ILSPManagerService.INSTALL_NO_SUCH_FILE -> stringResource(R.string.update_failed_download)
+        IFrameworkInstallReceiver.INSTALL_NO_ROOT -> stringResource(R.string.update_no_root)
+        IFrameworkInstallReceiver.INSTALL_NOT_EXECUTED ->
+            stringResource(R.string.update_failed_start)
+        IFrameworkInstallReceiver.INSTALL_NO_SUCH_FILE ->
+            stringResource(R.string.update_failed_download)
         else -> stringResource(R.string.update_failed_exit, code)
     }
 

@@ -3,7 +3,7 @@ package org.matrix.vector.daemon.data
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
-import org.lsposed.lspd.models.Application
+import org.matrix.vector.ipc.ScopeEntry
 import org.matrix.vector.daemon.system.NotificationManager
 
 private const val TAG = "VectorModuleDatabase"
@@ -39,9 +39,9 @@ object ModuleDatabase {
   /** The one database handle. [ConfigCache], [PreferenceStore] and the CLI all borrow it. */
   val dbHelper = Database()
 
-  fun getModuleScope(packageName: String): MutableList<Application>? {
+  fun getModuleScope(packageName: String): MutableList<ScopeEntry>? {
     if (packageName == "lspd") return null
-    val result = mutableListOf<Application>()
+    val result = mutableListOf<ScopeEntry>()
     dbHelper.readableDatabase
         .query(
             "scope INNER JOIN modules ON scope.mid = modules.mid",
@@ -54,7 +54,7 @@ object ModuleDatabase {
         .use { cursor ->
           while (cursor.moveToNext()) {
             result.add(
-                Application().apply {
+                ScopeEntry().apply {
                   this.packageName = cursor.getString(0)
                   this.userId = cursor.getInt(1)
                 })
@@ -203,8 +203,11 @@ object ModuleDatabase {
             put("apk_path", "") // defer to cache updating
             put("enabled", 1)
           }
-      db.insert("modules", null, values)
-      changed = true
+      // `insert` answers -1 rather than throwing: it catches the SQLException itself and logs one
+      // line. Taking that for granted reported a write that never landed as a success, and the
+      // caller acted on it — the manager left its switch on, and the shade's "not activated yet"
+      // notice was cancelled for a module the database had no row for.
+      changed = db.insert("modules", null, values) != -1L
     } else {
       val values = ContentValues().apply { put("enabled", 1) }
       changed = db.update("modules", values, "module_pkg_name = ?", arrayOf(packageName)) > 0
@@ -247,7 +250,7 @@ object ModuleDatabase {
     return changed
   }
 
-  fun setModuleScope(packageName: String, scope: MutableList<Application>): Boolean {
+  fun setModuleScope(packageName: String, scope: MutableList<ScopeEntry>): Boolean {
     // Last line of defence for staticScope. The manager, the socket CLI, a backup restore and a
     // module's own requestScope all end up here, so refusing here covers every one of them.
     ConfigCache.staticScopeOf(packageName)?.let { claimed ->
@@ -269,9 +272,16 @@ object ModuleDatabase {
 
       val values = ContentValues().apply { put("mid", mid) }
       for (app in scope) {
-        // The system server is one process for the whole device, so it is stored against user 0
-        // whoever asked for it — a module in a work profile hooking the framework is hooking the
-        // same system_server as everyone else.
+        // A module is one package, one APK and one scope set for the whole device — Android cannot
+        // hold two different builds under one package name, so there is nothing here to key by
+        // user. What [ScopeEntry.userId] names is the *target*: which installed instance of
+        // [ScopeEntry.packageName] this row points at. `ConfigCache` refuses to expand a row whose
+        // user does not hold the module, which is what keeps a module installed for one user out of
+        // another user's processes.
+        //
+        // The system server is the exception and is stored against user 0 whoever asked for it: it
+        // is one process for the whole device belonging to no user, so a module in a work profile
+        // hooking the framework is hooking the same system_server as everyone else.
         //
         // Normalised rather than dropped, which is what this used to do. Dropping meant restoring
         // a backup written by an older manager, which recorded the framework under the module's
@@ -321,7 +331,13 @@ object ModuleDatabase {
   }
 
   fun removeModuleScope(packageName: String, scopePackageName: String, userId: Int): Boolean {
-    if (packageName == "lspd" || (scopePackageName == "system" && userId != 0)) return false
+    if (packageName == "lspd") return false
+    // Normalised the same way [setModuleScope] normalises it, rather than refused. The framework is
+    // stored against user 0 whoever asked for it, so a removal keyed on the caller's own user
+    // matches no row at all - which meant a module outside user 0 could take system scope and then
+    // never give it back. It reached that state through the very same call: removeScope returns
+    // nothing, so the module was told its request had been honoured.
+    val storedUserId = if (scopePackageName == "system") 0 else userId
     val db = dbHelper.writableDatabase
     val mid =
         db.compileStatement("SELECT mid FROM modules WHERE module_pkg_name = ?")
@@ -330,7 +346,7 @@ object ModuleDatabase {
     db.delete(
         "scope",
         "mid = ? AND app_pkg_name = ? AND user_id = ?",
-        arrayOf(mid.toString(), scopePackageName, userId.toString()))
+        arrayOf(mid.toString(), scopePackageName, storedUserId.toString()))
     ConfigCache.requestCacheUpdate()
     return true
   }

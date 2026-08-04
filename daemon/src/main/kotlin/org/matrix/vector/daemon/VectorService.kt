@@ -15,21 +15,21 @@ import android.util.Log
 import hidden.HiddenApiBridge
 import io.github.libxposed.service.IXposedScopeCallback
 import kotlinx.coroutines.launch
-import org.lsposed.lspd.models.Application
-import org.lsposed.lspd.service.IDaemonService
-import org.lsposed.lspd.service.ILSPApplicationService
+import org.matrix.vector.ipc.ScopeEntry
+import org.matrix.vector.ipc.IVectorDaemon
+import org.matrix.vector.ipc.IFrameworkService
 import org.matrix.vector.daemon.data.ConfigCache
 import org.matrix.vector.daemon.data.ModuleDatabase
 import org.matrix.vector.daemon.data.PreferenceStore
 import org.matrix.vector.daemon.data.ProcessScope
-import org.matrix.vector.daemon.ipc.ApplicationService
+import org.matrix.vector.daemon.ipc.FrameworkService
 import org.matrix.vector.daemon.ipc.ManagerService
-import org.matrix.vector.daemon.ipc.ModuleService
+import org.matrix.vector.daemon.ipc.ModuleAppService
 import org.matrix.vector.daemon.system.*
 
 private const val TAG = "VectorService"
 
-object VectorService : IDaemonService.Stub() {
+object VectorService : IVectorDaemon.Stub() {
 
   private var bootCompleted = false
 
@@ -65,17 +65,17 @@ object VectorService : IDaemonService.Stub() {
     }
   }
 
-  override fun requestApplicationService(
+  override fun attachProcess(
       uid: Int,
       pid: Int,
       processName: String,
       heartBeat: IBinder
-  ): ILSPApplicationService? {
+  ): IFrameworkService? {
     if (Binder.getCallingUid() != 1000) {
-      Log.w(TAG, "Unauthorized requestApplicationService call")
+      Log.w(TAG, "Unauthorized attachProcess call")
       return null
     }
-    if (ApplicationService.hasRegister(uid, pid)) return null
+    if (FrameworkService.hasRegister(uid, pid)) return null
 
     val scope = ProcessScope(processName, uid)
     if (!ManagerService.tryRegisterManagerProcess(pid, uid, processName) &&
@@ -84,8 +84,8 @@ object VectorService : IDaemonService.Stub() {
       return null
     }
 
-    return if (ApplicationService.registerHeartBeat(uid, pid, processName, heartBeat)) {
-      ApplicationService
+    return if (FrameworkService.registerHeartBeat(uid, pid, processName, heartBeat)) {
+      FrameworkService
     } else null
   }
 
@@ -196,15 +196,15 @@ object VectorService : IDaemonService.Stub() {
     // UID Observer
     val uidObserver =
         object : android.app.IUidObserver.Stub() {
-          override fun onUidActive(uid: Int) = ModuleService.uidStarts(uid)
+          override fun onUidActive(uid: Int) = ModuleAppService.uidStarts(uid)
 
           override fun onUidCachedChanged(uid: Int, cached: Boolean) {
-            if (!cached) ModuleService.uidStarts(uid)
+            if (!cached) ModuleAppService.uidStarts(uid)
           }
 
-          override fun onUidIdle(uid: Int, disabled: Boolean) = ModuleService.uidStarts(uid)
+          override fun onUidIdle(uid: Int, disabled: Boolean) = ModuleAppService.uidStarts(uid)
 
-          override fun onUidGone(uid: Int, disabled: Boolean) = ModuleService.uidGone(uid)
+          override fun onUidGone(uid: Int, disabled: Boolean) = ModuleAppService.uidGone(uid)
         }
 
     val which =
@@ -316,7 +316,7 @@ object VectorService : IDaemonService.Stub() {
               val scopeList = ModuleDatabase.getModuleScope(xposedModule) ?: mutableListOf()
 
               val newScope =
-                  Application().apply {
+                  ScopeEntry().apply {
                     this.packageName = moduleName
                     this.userId = userId
                   }
@@ -367,7 +367,7 @@ object VectorService : IDaemonService.Stub() {
     if (moduleName != null && isXposedModule && !isRemovedAction && !isRemovedForAllUsers) {
       val scopes = ModuleDatabase.getModuleScope(moduleName) ?: emptyList()
       val isSystemModule = scopes.any { it.packageName == "system" }
-      val isEnabled = ManagerService.enabledModules().contains(moduleName)
+      val isEnabled = ManagerService.getEnabledModules().contains(moduleName)
 
       NotificationManager.notifyModuleUpdated(moduleName, userId, isEnabled, isSystemModule)
     }
@@ -449,11 +449,15 @@ object VectorService : IDaemonService.Stub() {
           when (action) {
             "approve" -> {
               val scopes = ModuleDatabase.getModuleScope(packageName) ?: mutableListOf()
-              if (scopes.none { it.packageName == scopePackageName && it.userId == userId }) {
+              // Compared against where the row will land, not against the user who asked: the
+              // framework is stored under user 0 whoever requested it, so for "system" this test
+              // never matched and every approval appended a duplicate and rewrote the whole table.
+              val storedUserId = if (scopePackageName == "system") 0 else userId
+              if (scopes.none { it.packageName == scopePackageName && it.userId == storedUserId }) {
                 scopes.add(
-                    Application().apply {
+                    ScopeEntry().apply {
                       this.packageName = scopePackageName
-                      this.userId = userId
+                      this.userId = storedUserId
                     })
                 ModuleDatabase.setModuleScope(packageName, scopes)
               }

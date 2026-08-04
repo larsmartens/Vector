@@ -12,11 +12,12 @@ android {
         }
     }
 
-    aidlPackagedList += "org/lsposed/lspd/models/Module.aidl"
-    namespace = "org.lsposed.lspd.daemonservice"
+    aidlPackagedList += "org/matrix/vector/ipc/LoadedModule.aidl"
+    namespace = "org.matrix.vector.daemonservice"
 }
 
 dependencies {
     compileOnly(libs.androidx.annotation)
+    compileOnly(libs.libxposed.annotation)
     compileOnly(projects.hiddenapi.stubs)
 }

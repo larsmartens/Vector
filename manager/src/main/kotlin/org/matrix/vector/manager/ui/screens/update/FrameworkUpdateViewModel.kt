@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.lsposed.lspd.ILSPManagerService
+import org.matrix.vector.ipc.IManagerService
 import org.matrix.vector.manager.data.repository.FlashStep
 import org.matrix.vector.manager.data.repository.FrameworkUpdateState
 import org.matrix.vector.manager.di.ServiceLocator
@@ -21,41 +21,37 @@ import org.matrix.vector.manager.logE
 import org.matrix.vector.manager.logW
 
 /** Which root implementation is in charge, and whether it can be flashed through. */
-data class RootState(val code: Int = ILSPManagerService.ROOT_UNKNOWN, val version: String? = null) {
+data class RootState(val code: Int = IManagerService.ROOT_UNKNOWN) {
 
     // Named implementations only. ROOT_UNKNOWN is also what a binder proxy returns for a
     // transaction the daemon does not implement, so it has to refuse rather than guess at an
     // installer to hand the zip to.
     val canFlash: Boolean
         get() =
-            code == ILSPManagerService.ROOT_MAGISK ||
-                code == ILSPManagerService.ROOT_KERNELSU ||
-                code == ILSPManagerService.ROOT_APATCH
+            code == IManagerService.ROOT_MAGISK ||
+                code == IManagerService.ROOT_KERNELSU ||
+                code == IManagerService.ROOT_APATCH
 
     /**
      * The sentence to show when flashing is not possible.
      *
-     * Null when it is, and four different strings when it is not — "nothing installed", "too old",
-     * "two of them" and "this daemon does not say" need four different actions from the reader, and
+     * Null when it is, and three different strings when it is not — "nothing installed", "two of
+     * them" and "this daemon does not say" need three different actions from the reader, and
      * collapsing them into one "unsupported" would tell someone with two root managers to go
      * install a root manager.
      */
     @androidx.compose.runtime.Composable
     fun label(): String? =
         when (code) {
-            ILSPManagerService.ROOT_TOO_OLD ->
-                androidx.compose.ui.res.stringResource(
-                    org.matrix.vector.manager.R.string.update_root_too_old
-                )
-            ILSPManagerService.ROOT_MULTIPLE ->
+            IManagerService.ROOT_MULTIPLE ->
                 androidx.compose.ui.res.stringResource(
                     org.matrix.vector.manager.R.string.update_root_multiple
                 )
-            ILSPManagerService.ROOT_NONE ->
+            IManagerService.ROOT_NONE ->
                 androidx.compose.ui.res.stringResource(
                     org.matrix.vector.manager.R.string.update_no_root
                 )
-            ILSPManagerService.ROOT_UNKNOWN ->
+            IManagerService.ROOT_UNKNOWN ->
                 androidx.compose.ui.res.stringResource(
                     org.matrix.vector.manager.R.string.update_root_unknown
                 )
@@ -81,18 +77,36 @@ class FrameworkUpdateViewModel : ViewModel() {
      * The release the screen is about.
      *
      * Defaults to whatever is worth offering — the update if there is one, otherwise the newest
-     * known build, which is usually the installed one — and follows an explicit choice once made.
-     * Held as a version code rather than the object so a refresh that returns fresh instances does
-     * not silently drop the selection.
+     * build on this reader's channel, which is usually the installed one — and follows an explicit
+     * choice once made. Held as a version code rather than the object so a refresh that returns
+     * fresh instances does not silently drop the selection.
+     *
+     * The pin is resolved against the whole catalogue, both channels, while the defaults stay on
+     * the reader's own. Asking is not the same as being offered: someone on a release build who
+     * opened the canary list and pressed install on a row has named the build they want, and
+     * looking that number up in the release-only list finds nothing and quietly hands them the
+     * stable release instead.
      */
     val selected: StateFlow<FrameworkRelease?> =
         combine(update, explicit) { state, pinned ->
-                val list = state.history
-                pinned?.let { code -> list.firstOrNull { it.versionCode == code } }
+                pinned?.let { code -> state.catalog.firstOrNull { it.versionCode == code } }
                     ?: state.available
-                    ?: list.firstOrNull()
+                    ?: state.history.firstOrNull()
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /**
+     * The builds the version picker lists.
+     *
+     * The reader's own channel, unless the page is sitting on a canary — then all of them. A page
+     * opened from the canary list is a page about prereleases, and a picker that answered it with
+     * the stable list would offer no way back to the build the reader had just been looking at.
+     */
+    val history: StateFlow<List<FrameworkRelease>> =
+        combine(update, selected) { state, release ->
+                if (release?.isCanary == true) state.catalog else state.history
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** Where the selected release sits relative to what is running. */
     val direction: StateFlow<ReleaseDirection> =
@@ -120,7 +134,7 @@ class FrameworkUpdateViewModel : ViewModel() {
      * The canary list arrives here naming the build it was showing. It holds no [FrameworkRelease]
      * — it reads the same prereleases through a different shape — but CI tags every canary
      * `canary-<versionCode>`, so the number is the one thing both sides already agree on. Pinning
-     * it before the list has loaded is fine: [selected] resolves the number against the history
+     * it before the list has loaded is fine: [selected] resolves the number against the catalogue
      * whenever that arrives.
      */
     fun select(versionCode: Long) {
@@ -157,24 +171,23 @@ class FrameworkUpdateViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            // Two logs for the four requests these blocks make. They all fail from the same
-            // unreachable binder, so only the two that decide what the screen says are recorded;
-            // the root version and the framework commit take their default in silence.
+            // One log for the requests these blocks make. They all fail from the same unreachable
+            // binder, so only the one that decides what the screen says is recorded; the build
+            // stamp takes its default in silence.
             val code =
                 daemon.getRootImplementation().getOrElse { e ->
                     logW("update: root implementation unreadable, screen will say it is unknown", e)
-                    ILSPManagerService.ROOT_UNKNOWN
+                    IManagerService.ROOT_UNKNOWN
                 }
-            val version = daemon.getRootImplementationVersion().getOrNull()
-            _root.value = RootState(code, version)
+            _root.value = RootState(code)
         }
         viewModelScope.launch {
             val installed =
-                daemon.getXposedVersionCode().getOrElse { e ->
+                daemon.getFrameworkVersionCode().getOrElse { e ->
                     logW("update: installed framework version unavailable, update check skipped", e)
                     0L
                 }
-            updates.refresh(installed, daemon.getFrameworkCommit().getOrNull())
+            updates.refresh(installed, daemon.getBuildStamp().getOrNull())
         }
     }
 
