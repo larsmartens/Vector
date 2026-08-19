@@ -151,6 +151,14 @@ fun LogsScreen(
     // search boxes, two filter states and two scroll positions for what is one question — "what
     // does the log say" — whose answer often has to be looked for in both streams.
     var currentTab by rememberSaveable { mutableStateOf(LogTab.MODULES) }
+    // Read from the source rather than snapshotted in the view model: a host can gain or lose its
+    // verbose stream while the screen is open (a backend granted, a service lost), and the control
+    // has to follow. Losing it mid-read also has to move the reader back, or the pane would stay on
+    // a stream the host no longer serves.
+    val hasVerboseStream = source.hasVerboseStream
+    LaunchedEffect(hasVerboseStream) {
+        if (!hasVerboseStream && currentTab == LogTab.VERBOSE) currentTab = LogTab.MODULES
+    }
     val currentState by viewModel.state(currentTab).collectAsStateWithLifecycle()
     val wordWrap by viewModel.wordWrap.collectAsStateWithLifecycle()
     val saveState by viewModel.saveState.collectAsStateWithLifecycle()
@@ -223,6 +231,7 @@ fun LogsScreen(
                         state = currentState,
                         viewModel = viewModel,
                         onSelectTab = { currentTab = it },
+                        showSourceToggle = hasVerboseStream,
                     )
                 },
                 actions = {
@@ -560,6 +569,7 @@ private fun LogSearch(
     state: LogPaneState,
     viewModel: LogsViewModel,
     onSelectTab: (LogTab) -> Unit,
+    showSourceToggle: Boolean,
 ) {
     var filterOpen by remember { mutableStateOf(false) }
     SearchField(
@@ -567,7 +577,7 @@ private fun LogSearch(
         onQueryChange = { viewModel.setQuery(tab, it) },
         placeholder = stringResource(R.string.logs_search_hint),
         trailing = {
-            LogSourceToggle(tab = tab, onSelect = onSelectTab)
+            if (showSourceToggle) LogSourceToggle(tab = tab, onSelect = onSelectTab)
             IconButton(
                 onClick = {
                     filterOpen = true

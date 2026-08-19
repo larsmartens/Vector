@@ -42,6 +42,17 @@ interface LogSource {
      */
     suspend fun open(verbose: Boolean, part: String?): Result<LogContent?>
 
+    /**
+     * Whether the host actually has a second, verbose stream to unfold into.
+     *
+     * A host can be reduced to a single log — one that reads only its own process because the
+     * privileged backend it normally reads the device through is unavailable — and then the two
+     * streams would be the same lines under two names. Saying so drops the unfold control instead of
+     * offering a choice that changes nothing.
+     */
+    val hasVerboseStream: Boolean
+        get() = true
+
     // --- Verbose-logging preference (distinct from which stream is on screen) ------------------
 
     /** Whether the host has a persistent "write verbose lines at all" preference to toggle. */
