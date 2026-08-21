@@ -392,15 +392,6 @@
     <string name="scope_framework_restart_title">系统框架尚未应用此更改</string>
     <string name="scope_framework_restart_body">系统框架只在 Android 启动时加载一次。此更改要等到框架重启后才会生效——所有正在运行的应用都会关闭，手机本身保持开机。</string>
     <string name="scope_framework_restart_later">稍后</string>
-    <string name="settings_network">网络</string>
-    <string name="settings_doh">通过 HTTPS 解析域名</string>
-    <string name="settings_doh_summary">通过 Cloudflare 而非网络自带的解析器查询域名。适用于屏蔽或篡改 DNS 的网络。</string>
-    <string name="settings_doh_untested">尚未解析任何域名。</string>
-    <string name="settings_doh_bypassed">未使用：已配置代理，域名由代理解析。</string>
-    <string name="settings_doh_working">正常 — 已通过 Cloudflare 解析 %1$s。</string>
-    <string name="settings_doh_fell_back">无法连接 Cloudflare（%1$s），本次会话的剩余时间将使用网络自带的解析器。</string>
-    <string name="settings_doh_retry">重试</string>
-
     <string name="launcher_title">如何打开 Vector</string>
     <string name="launcher_body">Vector 并未作为应用安装，桌面因此没有可显示的图标。以下是回到它的几种方式。</string>
     <string name="launcher_shortcut">桌面快捷方式</string>

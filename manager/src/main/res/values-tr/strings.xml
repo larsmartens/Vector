@@ -402,15 +402,6 @@
     <string name="scope_framework_restart_title">Çatı bunu henüz almadı</string>
     <string name="scope_framework_restart_body">Sistem çatısı yalnızca bir kez, Android başlarken yüklenir. Bu değişiklik ona ancak çatı yeniden başlatıldığında ulaşır — çalışan tüm uygulamalar kapanır, telefonun kendisi açık kalır.</string>
     <string name="scope_framework_restart_later">Daha sonra</string>
-    <string name="settings_network">Ağ</string>
-    <string name="settings_doh">Adları HTTPS üzerinden çöz</string>
-    <string name="settings_doh_summary">Adları ağın çözümleyicisi yerine Cloudflare üzerinden çözer. DNS\'i engelleyen veya kurcalayan ağlar için.</string>
-    <string name="settings_doh_untested">Henüz hiçbir ad çözümlenmedi.</string>
-    <string name="settings_doh_bypassed">Kullanılmıyor: bir proxy yapılandırılmış, adları o çözümlüyor.</string>
-    <string name="settings_doh_working">Çalışıyor — %1$s Cloudflare üzerinden çözümlendi.</string>
-    <string name="settings_doh_fell_back">Cloudflare\'a ulaşılamadı (%1$s), bu oturumun kalanında ağın çözümleyicisi kullanılacak.</string>
-    <string name="settings_doh_retry">Yeniden dene</string>
-
     <string name="launcher_title">Vector nasıl açılır</string>
     <string name="launcher_body">Vector uygulama olarak kurulu değil, bu yüzden başlatıcınızın gösterecek bir şeyi yok. Geri dönmenin yolları şunlar.</string>
     <string name="launcher_shortcut">Ana ekran kısayolu</string>

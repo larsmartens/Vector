@@ -29,7 +29,6 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Colorize
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Dashboard
-import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.OpenInBrowser
@@ -69,9 +68,8 @@ import org.matrix.vector.manager.R
 import org.matrix.vector.ui.ChoiceRow
 import org.matrix.vector.ui.SheetAction
 import org.matrix.vector.ui.SheetHeading
-import org.matrix.vector.ui.StatusNote
 import org.matrix.vector.ui.ToggleRow
-import org.matrix.vector.manager.net.DohStatus
+import org.matrix.vector.ui.net.DohSettingSection
 import org.matrix.vector.manager.di.ServiceLocator
 import org.matrix.vector.ui.ColorWheel
 import org.matrix.vector.ui.ambience.AmbienceKind
@@ -124,8 +122,6 @@ fun HomeAppearanceSheet(onDismiss: () -> Unit) {
         }
     val windowMonths by settings.activityWindowMonths.collectAsStateWithLifecycle()
     val openExternally by settings.openLinksExternally.collectAsStateWithLifecycle()
-    val doh by settings.dohEnabled.collectAsStateWithLifecycle()
-    val dohStatus by ServiceLocator.dns.status.collectAsStateWithLifecycle()
 
     // Every value stays enabled, deliberately. Dropping PartiallyExpanded removes the half-height
     // stop, which is the only thing a drag on a sheet can *do* other than dismiss it, so a sheet
@@ -247,52 +243,8 @@ LocalizedOverlay {
             // filter on that list: VectorDns applies it to the one OkHttp client, so it governs
             // the activity feed and the framework update check as much as the module mirrors —
             // and a reader whose network breaks GitHub has no reason to look for it under Store.
-            SheetHeading(stringResource(R.string.settings_network), Icons.Rounded.Dns)
-            ToggleRow(
-                title = stringResource(R.string.settings_doh),
-                icon = Icons.Rounded.Dns,
-                subtitle = stringResource(R.string.settings_doh_summary),
-                checked = doh,
-                onCheckedChange = settings::setDohEnabled,
-            )
-            // The switch says what was asked for; this says what happened. They come apart more
-            // often than the switch admits — a proxy takes the decision away entirely, and one
-            // unreachable lookup latches the fallback for the rest of the session — and until now
-            // all three cases looked identical from here.
-            //
-            // Only while the switch is on. Off, the switch has already said so, and a second line
-            // repeating it would be the one piece of this that carries no information.
-            if (doh) {
-                when (val state = dohStatus) {
-                    is DohStatus.Untested ->
-                        StatusNote(stringResource(R.string.settings_doh_untested))
-
-                    is DohStatus.Bypassed ->
-                        StatusNote(stringResource(R.string.settings_doh_bypassed))
-
-                    is DohStatus.Working ->
-                        StatusNote(
-                            stringResource(R.string.settings_doh_working, state.host),
-                            tone = MaterialTheme.colorScheme.primary,
-                        )
-
-                    // The one state with something to offer. Not an error colour: falling back is
-                    // the designed behaviour and the app is working, so this is the shade the rest
-                    // of the app uses for "worth knowing", not for "something is broken".
-                    is DohStatus.FellBack ->
-                        StatusNote(
-                            stringResource(R.string.settings_doh_fell_back, state.reason),
-                            tone = MaterialTheme.colorScheme.tertiary,
-                            actionLabel = stringResource(R.string.settings_doh_retry),
-                            onAction = ServiceLocator.dns::retry,
-                        )
-
-                    // Reachable only in the gap between flipping the switch on and the next lookup
-                    // recording something newer.
-                    is DohStatus.Disabled ->
-                        StatusNote(stringResource(R.string.settings_doh_untested))
-                }
-            }
+            // The section itself is shared with LSPatch, which resolves the same way.
+            DohSettingSection(settings, ServiceLocator.dns.status, ServiceLocator.dns::retry)
 
             ToggleRow(
                 title = stringResource(R.string.settings_open_externally),

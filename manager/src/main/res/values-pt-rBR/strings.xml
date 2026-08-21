@@ -402,15 +402,6 @@
     <string name="scope_framework_restart_title">O framework ainda não aplicou isso</string>
     <string name="scope_framework_restart_body">O framework do sistema é carregado uma única vez, quando o Android inicia. Esta alteração só chega a ele quando o framework reinicia — todos os apps em execução fecham e o telefone continua ligado.</string>
     <string name="scope_framework_restart_later">Mais tarde</string>
-    <string name="settings_network">Rede</string>
-    <string name="settings_doh">Resolver nomes por HTTPS</string>
-    <string name="settings_doh_summary">Resolve nomes pela Cloudflare em vez do resolvedor da rede. Para redes que bloqueiam ou adulteram o DNS.</string>
-    <string name="settings_doh_untested">Nenhum nome resolvido ainda.</string>
-    <string name="settings_doh_bypassed">Sem uso: há um proxy configurado, então é ele que resolve os nomes.</string>
-    <string name="settings_doh_working">Funcionando — %1$s foi resolvido pela Cloudflare.</string>
-    <string name="settings_doh_fell_back">Não foi possível alcançar a Cloudflare (%1$s), então o resolvedor da rede será usado no resto desta sessão.</string>
-    <string name="settings_doh_retry">Tentar de novo</string>
-
     <string name="launcher_title">Como abrir o Vector</string>
     <string name="launcher_body">O Vector não está instalado como app, então seu launcher não tem o que mostrar. Estes são os caminhos de volta.</string>
     <string name="launcher_shortcut">Atalho na tela inicial</string>

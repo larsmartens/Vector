@@ -391,15 +391,6 @@
     <string name="scope_framework_restart_title">Framework chưa tiếp nhận thay đổi này</string>
     <string name="scope_framework_restart_body">Framework hệ thống chỉ được nạp một lần, khi Android khởi động. Thay đổi này chỉ tới được nó khi framework khởi động lại — mọi ứng dụng đang chạy sẽ đóng, còn điện thoại vẫn bật.</string>
     <string name="scope_framework_restart_later">Để sau</string>
-    <string name="settings_network">Mạng</string>
-    <string name="settings_doh">Phân giải tên qua HTTPS</string>
-    <string name="settings_doh_summary">Phân giải tên qua Cloudflare thay vì trình phân giải của mạng. Dành cho mạng chặn hoặc can thiệp DNS.</string>
-    <string name="settings_doh_untested">Chưa phân giải tên nào.</string>
-    <string name="settings_doh_bypassed">Không dùng: đã cấu hình proxy nên proxy đang phân giải tên.</string>
-    <string name="settings_doh_working">Đang hoạt động — %1$s được phân giải qua Cloudflare.</string>
-    <string name="settings_doh_fell_back">Không kết nối được tới Cloudflare (%1$s), nên trình phân giải của mạng sẽ được dùng trong phần còn lại của phiên này.</string>
-    <string name="settings_doh_retry">Thử lại</string>
-
     <string name="launcher_title">Cách mở Vector</string>
     <string name="launcher_body">Vector không được cài như một ứng dụng, nên trình khởi chạy không có gì để hiển thị. Đây là những cách quay lại.</string>
     <string name="launcher_shortcut">Lối tắt trên màn hình chính</string>

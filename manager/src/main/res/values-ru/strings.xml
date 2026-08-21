@@ -407,15 +407,6 @@
     <string name="scope_framework_restart_title">Фреймворк ещё не применил это</string>
     <string name="scope_framework_restart_body">Системный фреймворк загружается один раз, при запуске Android. Это изменение дойдёт до него только при перезапуске фреймворка — все работающие приложения закроются, а телефон останется включённым.</string>
     <string name="scope_framework_restart_later">Позже</string>
-    <string name="settings_network">Сеть</string>
-    <string name="settings_doh">Разрешать имена через HTTPS</string>
-    <string name="settings_doh_summary">Разрешает имена через Cloudflare, а не через резолвер сети. Для сетей, которые блокируют или подменяют DNS.</string>
-    <string name="settings_doh_untested">Пока ни одно имя не разрешалось.</string>
-    <string name="settings_doh_bypassed">Не используется: настроен прокси, и разрешением имён занимается он.</string>
-    <string name="settings_doh_working">Работает — %1$s разрешено через Cloudflare.</string>
-    <string name="settings_doh_fell_back">Cloudflare недоступен (%1$s), поэтому до конца этого сеанса используется резолвер сети.</string>
-    <string name="settings_doh_retry">Повторить</string>
-
     <string name="launcher_title">Как открыть Vector</string>
     <string name="launcher_body">Vector не установлен как приложение, поэтому лаунчеру нечего показывать. Вот как в него вернуться.</string>
     <string name="launcher_shortcut">Ярлык на главном экране</string>

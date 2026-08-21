@@ -33,6 +33,15 @@ interface LogSource {
     suspend fun parts(verbose: Boolean): List<String>
 
     /**
+     * A name for the process behind a uid, or null to leave it as the number.
+     *
+     * The log records who wrote a line as a uid, which is not something a reader recognises. Asked only of the uids the
+     * filter offers, so a host may resolve it however it likes -- LSPatch reads its package list -- without that cost
+     * falling on the scan.
+     */
+    fun writerLabel(uid: Int): String? = null
+
+    /**
      * Opens a stream for reading. [part] names a rotated part, or null for the live tail.
      *
      * The three outcomes map to three screen states: a failed [Result] is the source being

@@ -402,15 +402,6 @@
     <string name="scope_framework_restart_title">چارچوب سامانه هنوز این را اعمال نکرده است</string>
     <string name="scope_framework_restart_body">چارچوب سامانه تنها یک بار، هنگام راه‌اندازی اندروید، بارگذاری می‌شود. این تغییر تنها پس از راه‌اندازی دوبارهٔ چارچوب به آن می‌رسد — همهٔ برنامه‌های در حال اجرا بسته می‌شوند و خود گوشی روشن می‌ماند.</string>
     <string name="scope_framework_restart_later">بعداً</string>
-    <string name="settings_network">شبکه</string>
-    <string name="settings_doh">تحلیل نام‌ها از راه HTTPS</string>
-    <string name="settings_doh_summary">نام‌ها را به‌جای تحلیل‌گر شبکه از راه Cloudflare پیدا می‌کند. برای شبکه‌هایی که DNS را مسدود یا دستکاری می‌کنند.</string>
-    <string name="settings_doh_untested">هنوز هیچ نامی تحلیل نشده است.</string>
-    <string name="settings_doh_bypassed">استفاده نمی‌شود: یک پیشکار پیکربندی شده و نام‌ها را او تحلیل می‌کند.</string>
-    <string name="settings_doh_working">کار می‌کند — %1$s از راه Cloudflare تحلیل شد.</string>
-    <string name="settings_doh_fell_back">دسترسی به Cloudflare ممکن نشد (%1$s)، بنابراین تا پایان این نشست از تحلیل‌گر شبکه استفاده می‌شود.</string>
-    <string name="settings_doh_retry">تلاش دوباره</string>
-
     <string name="launcher_title">چگونه Vector را باز کنیم</string>
     <string name="launcher_body">Vector به‌عنوان برنامه نصب نشده است، پس لانچر چیزی برای نشان دادن ندارد. اینها راه‌های بازگشت به آن هستند.</string>
     <string name="launcher_shortcut">میان‌بر در صفحهٔ اصلی</string>
