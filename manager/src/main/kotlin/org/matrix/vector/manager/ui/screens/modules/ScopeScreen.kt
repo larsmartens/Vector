@@ -43,7 +43,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
+import org.matrix.vector.ui.contextClickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -960,7 +960,7 @@ private fun AppRow(
 
     ListItem(
         modifier =
-            Modifier.combinedClickable(
+            Modifier.contextClickable(
                     onClick = { if (enabled) onToggle(!app.isSelectedInScope) },
                     onLongClick = {
                         // The long press is where re-optimize lives, and re-optimize is the fix

@@ -5,7 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
+import org.matrix.vector.ui.contextClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -212,7 +212,7 @@ fun CommitRow(
                     // means "open this commit", and a long press on a subject line has no obvious
                     // subject; a long press on a name plainly means *that name*.
                     modifier =
-                        Modifier.combinedClickable(
+                        Modifier.contextClickable(
                             onClick = { onOpenCommit(commit) },
                             onLongClick = {
                                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)

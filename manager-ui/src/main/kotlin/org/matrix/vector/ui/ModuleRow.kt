@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -135,7 +134,7 @@ fun ModuleRow(
         Column(
             modifier =
                 if (onIconClick != null)
-                    Modifier.combinedClickable(onClick = onIconClick, onLongClick = onIconLongClick)
+                    Modifier.contextClickable(onClick = onIconClick, onLongClick = onIconLongClick)
                 else Modifier,
             // Against the text, not centred over the badge: the badge below is wider than the icon,
             // so centring left a gap between the icon and the edge the names all start from.
@@ -175,7 +174,7 @@ fun ModuleRow(
             Modifier.weight(1f)
                 .then(
                     if (onClick != null)
-                        Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                        Modifier.contextClickable(onClick = onClick, onLongClick = onLongClick)
                     else Modifier
                 )
         ) {

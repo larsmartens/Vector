@@ -143,6 +143,28 @@ object ModuleDatabase {
     return rows
   }
 
+  /**
+   * Whether any enabled module names [appPackage] as a target, in any user.
+   *
+   * Asked of the configuration rather than of [ConfigCache], because the cache cannot answer it.
+   * Its scope map is keyed by uid, and a package that was uninstalled and installed again comes
+   * back under a *new* one — while the row here, keyed by name, has been waiting for it the whole
+   * time. Matching the cache by uid therefore said "not a target" about the one case that most
+   * needs a rebuild, and the app stayed unhooked until something unrelated rebuilt the cache.
+   */
+  fun isEnabledScopeTarget(appPackage: String): Boolean =
+      dbHelper.readableDatabase
+          .query(
+              "scope INNER JOIN modules ON scope.mid = modules.mid",
+              arrayOf("1"),
+              "app_pkg_name = ? AND enabled = 1",
+              arrayOf(appPackage),
+              null,
+              null,
+              null,
+              "1")
+          .use { it.moveToFirst() }
+
   /** Enabled modules scoped to the system framework, with the path last resolved for each. */
   fun systemServerModuleRows(): List<EnabledModuleRow> {
     val rows = mutableListOf<EnabledModuleRow>()

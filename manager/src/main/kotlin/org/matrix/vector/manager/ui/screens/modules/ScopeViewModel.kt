@@ -490,6 +490,12 @@ class ScopeViewModel(
                 // A scope the daemon will not hand over shows as none rather than keeping the
                 // screen shut; [readSavedScope] logs why, and keeps that case apart from the empty
                 // list a module with nothing ticked legitimately has.
+                // Everything the daemon holds, and not only what the list above can draw. A scope
+                // row outlives the app it names — uninstalling a target deletes nothing, so that
+                // installing it again puts the module back — and such a row has no app to appear
+                // as, since the list is built from installed packages. Seeding the draft with the
+                // whole saved set is what carries it through: the apply writes the difference this
+                // screen made, so a row nothing here can see is neither shown nor dropped.
                 val saved = readSavedScope() ?: emptySet()
                 savedScope.value = saved
                 draftScope.value = saved

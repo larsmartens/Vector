@@ -312,6 +312,16 @@ object VectorService : IVectorDaemon.Stub() {
           if (isRemovedForAllUsers && ModuleDatabase.removeModule(moduleName)) {
             // If it was in our DB and we successfully removed it, we treat it as an Xposed module.
             isXposedModule = true
+          } else if (ModuleDatabase.isEnabledScopeTarget(moduleName)) {
+            // A target's scope rows outlive it deliberately — they are what puts the module back
+            // when the app returns — but the entry the cache derived from them must not, and this
+            // branch asked for nothing. What cleaned it up was ACTION_UID_REMOVED, further down,
+            // and only ever incidentally: it fires when the *uid* is retired, which is neither
+            // this event nor guaranteed to follow it. A package that shares a uid with another
+            // retires none, and a daemon not running to hear the one that is sent never learns of
+            // it. The entry left behind is keyed by a uid that no longer names this app, and
+            // Android does hand a freed app id to the next installer that asks.
+            ConfigCache.requestCacheUpdate()
           }
         }
       }
@@ -323,9 +333,23 @@ object VectorService : IVectorDaemon.Stub() {
               ModuleDatabase.updateModuleApkPath(
                   moduleName, ConfigCache.getModuleApkPath(appInfo), false)
         } else {
-          if (ConfigCache.state.scopes.keys.any { it.uid == uid }) {
-            // If not a module, but it's an app that was previously a "scope" (target)
-            // for a module, we need to refresh the cache.
+          // If not a module, but it's an app some module targets, the cache has to be rebuilt so
+          // that the target is resolved again.
+          //
+          // The configuration is asked first, and by name, because the cache alone gets the one
+          // case that matters most wrong. Its scopes are keyed by uid: an app that is uninstalled
+          // and installed again comes back under a *new* uid, and the entry under the old one went
+          // when ACTION_UID_REMOVED rebuilt the cache — so no key matched, no rebuild was asked
+          // for, and the app was left out of the scope map it is still configured to be in. The
+          // row was never deleted, so the manager went on showing the target ticked, correctly,
+          // beside an app nothing was being loaded into; there was no difference to apply and
+          // therefore no way to put it right from the manager at all. It stayed that way until
+          // something unrelated rebuilt the cache — any scope edit, or the next boot.
+          //
+          // The uid test is kept behind it for the rows no scope table holds: a module in its own
+          // scope, and the self-scope a legacy module gets derived rather than stored.
+          if ((moduleName != null && ModuleDatabase.isEnabledScopeTarget(moduleName)) ||
+              ConfigCache.state.scopes.keys.any { it.uid == uid }) {
             ConfigCache.requestCacheUpdate()
           }
 

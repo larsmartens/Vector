@@ -45,6 +45,22 @@ class Database(context: Context? = FakeContext()) :
         """
         CREATE TABLE IF NOT EXISTS scope (
             mid integer,
+            -- A target is named, never numbered: a package and a user, and no uid. What the
+            -- injection path matches on is a uid, but that is derived in `ConfigCache` and rebuilt
+            -- from these rows, so a target that comes back under a new uid is found again by name.
+            --
+            -- Which is what gives a row its lifetime: it outlives the application it names.
+            -- Uninstalling a target deletes nothing here, and installing it again puts the module
+            -- back as soon as the cache is rebuilt. Deliberately so — an update shipped as an
+            -- uninstall and a reinstall, a ROM migration, or a restore from a backup would
+            -- otherwise drop the configuration without saying anything. The cost of it is that the
+            -- name is the whole identity, so a different build that later claims the name inherits
+            -- the scope: a row is a statement about a name, not about a signed application.
+            --
+            -- Four things delete one, and nothing else does: a module's scope being replaced
+            -- wholesale (a manager apply, the CLI, a restore), an explicit removal (`scope remove`,
+            -- or a module withdrawing its own request), pruning a module to the scope its
+            -- module.prop fixes, and the cascade below when the module itself is uninstalled.
             app_pkg_name text NOT NULL,
             user_id integer NOT NULL,
             PRIMARY KEY (mid, app_pkg_name, user_id),

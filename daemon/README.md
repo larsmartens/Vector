@@ -30,6 +30,20 @@ To handle concurrent IPC requests without starving Android Binder thread pools, 
 * Atomic Swaps: When the underlying SQLite database changes, the daemon triggers a conflated channel request. A background coroutine queries the database, computes the new module topology, instantiates a new `DaemonState`, and atomically swaps the reference in `ConfigCache`.
 * Preference Isolation: High-frequency module preference reads and writes are decoupled from the core state. Managed by `PreferenceStore`, preferences are serialized as binary blobs and pushed as differential updates to modules, preventing unnecessary cache rebuilds.
 
+## Scope Configuration
+
+The `scope` table records which applications a module may modify. A row is identified by package name and user id (`PRIMARY KEY (mid, app_pkg_name, user_id)`) and stores no uid. `ConfigCache` resolves those names into the `(process name, uid)` keys the injection path matches on, and re-resolves them on every rebuild. The table is the configuration — what was asked for; the cache is the realisation — what can be loaded right now.
+
+That separation is what gives a scope row its lifetime.
+
+* Rows outlive their target. Uninstalling an application that is in scope removes nothing from the table, and installing it again puts the module back once the cache is rebuilt. This is intended: an update shipped as an uninstall and a reinstall, a ROM migration, or a restore would otherwise drop the configuration without saying anything. Scope backups are lists of package names for the same reason, and restore rows for applications that are not installed yet.
+* The package name is the whole identity. A different build that later claims the name inherits the scope, so a row is a statement about a name rather than about a signed application.
+* While its target is absent, a row is invisible in the manager, which lists installed applications only. It survives an apply regardless: the scope editor writes the difference the reader made rather than replacing the table, so a row it cannot draw is neither shown nor dropped.
+* Four paths delete a row, and nothing else does — a module's scope being replaced wholesale (a manager apply, the CLI, a restore), an explicit removal (`scope remove`, or a module withdrawing its own request), pruning a module to the scope its `module.prop` fixes, and the foreign key cascade when the module itself is uninstalled.
+* Package events decide by name. A package that has just been installed arrives under a uid the cache has never seen — a reinstalled target is not the uid it left as — so `VectorService` asks the scope table whether the package is a target before requesting a rebuild. Matching the arriving uid against the cache answers "no" for precisely the case that needs the rebuild.
+
+Module configuration follows the opposite rule: a module whose package no user holds any more is deleted from the database along with its scope and its preferences. A module that is not installed cannot be loaded into anything, while a target that is not installed is only a target that is not running.
+
 ## IPC Architecture
 
 The daemon implements a multi-layered IPC design utilizing Android's Binder mechanism and UNIX domain sockets. It avoids registering standard AIDL services with `ServiceManager`, relying instead on intercepting Binder transactions via the Zygisk module and actively pushing Binder references to target processes.

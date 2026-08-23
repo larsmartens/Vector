@@ -226,6 +226,11 @@ object ConfigCache {
 
         // Gone, not broken. No user has this package any more, so the configuration for it is
         // meaningless and is cleaned up. This is the only case that deletes anything.
+        //
+        // The rule belongs to modules alone, and the asymmetry with a *target* that no user holds
+        // is the point: a module that is not installed cannot be loaded into anything, while a
+        // target that is not installed is only a target that is not running. Its scope rows stay,
+        // and are what puts the module back when it returns — see the `scope` table's own note.
         if (pkgInfo?.applicationInfo == null) {
           Log.w(TAG, "Failed to find package info of $pkgName")
           obsoleteModules.add(pkgName)

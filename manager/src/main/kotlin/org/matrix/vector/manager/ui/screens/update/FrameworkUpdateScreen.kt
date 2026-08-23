@@ -13,22 +13,15 @@ import org.matrix.vector.manager.data.github.FrameworkRelease
 import org.matrix.vector.manager.data.github.GitHubRepository
 import java.util.Date
 import java.text.DateFormat
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberBottomSheetState
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ListItem
-import androidx.compose.material.icons.rounded.RadioButtonUnchecked
-import androidx.compose.material.icons.rounded.RadioButtonChecked
-import androidx.compose.material.icons.rounded.History
 import org.matrix.vector.manager.data.github.ZipVariant
 import org.matrix.vector.manager.data.github.CanaryArtifact
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import org.matrix.vector.ui.update.VariantPicker
 import org.matrix.vector.ui.update.VariantChoice
+import org.matrix.vector.ui.update.VersionHistoryItem
+import org.matrix.vector.ui.update.VersionHistorySheet
+import org.matrix.vector.ui.update.VersionStatus
 import org.matrix.vector.ui.update.formatSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -53,6 +46,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.SystemUpdateAlt
 import androidx.compose.material3.Button
@@ -514,16 +508,6 @@ private fun failureText(code: Int): String =
     }
 
 /**
- * How much of a version row the status on its right may take.
- *
- * Wide enough for "Installed" and "Older" on one line in every language shipped, and narrow enough
- * that what is left still holds a build's name and its date without wrapping on a phone. The
- * divergence clause is longer than that and wraps inside this width, which is the point of fixing
- * it: one row's wordier status must not move where the next row's name begins.
- */
-private val STATUS_WIDTH = 96.dp
-
-/**
  * Every build on this channel, so "no update available" is not a dead end.
  *
  * The same list that answers "is there anything newer" also answers "what could I go back to",
@@ -539,7 +523,6 @@ private val STATUS_WIDTH = 96.dp
  * commit at all. Marking on the number alone would put a confident "Installed" against a row the
  * bar two lines up is calling divergent.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun VersionsSheet(
     history: List<FrameworkRelease>,
@@ -548,106 +531,55 @@ private fun VersionsSheet(
     onSelect: (FrameworkRelease) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
-    val colors = MaterialTheme.colorScheme
     val locale = currentLocale()
+    // Resolved once, out of the map below: stringResource is @Composable and cannot be called from
+    // a plain transform lambda.
+    val heading = stringResource(R.string.update_versions)
+    val canaryLabel = stringResource(R.string.update_channel_canary)
+    val releaseLabel = stringResource(R.string.update_channel_release)
+    val installedLabel = stringResource(R.string.update_installed)
+    val sameNumberLabel = stringResource(R.string.update_same_number)
+    val olderLabel = stringResource(R.string.update_older)
+    val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, locale)
 
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        LocalizedOverlay {
-            Column(Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
-                SheetHeading(stringResource(R.string.update_versions), Icons.Rounded.History)
-                history.forEach { release ->
-                    val sameNumber = release.versionCode == update.installedVersionCode
-                    // A build that carries this number but was not made from this release: another
-                    // branch, or a working tree with changes in it.
-                    val diverged = update.divergesFrom(release)
-                    val installed = sameNumber && !diverged
-                    val older = release.versionCode < update.installedVersionCode
-                    ListItem(
-                        modifier =
-                            Modifier.clickable {
-                                onSelect(release)
-                                onDismiss()
-                            },
-                        supportingContent = {
-                            Text(
-                                listOfNotNull(
-                                        DateFormat.getDateInstance(DateFormat.MEDIUM, locale)
-                                            .format(Date(release.epochSeconds * 1000)),
-                                        if (release.isCanary) {
-                                            stringResource(R.string.update_channel_canary)
-                                        } else {
-                                            stringResource(R.string.update_channel_release)
-                                        },
-                                    )
-                                    .joinToString("  ·  "),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                        leadingContent = {
-                            // The one that is running, marked the way the activity feed marks the
-                            // commit you are on — a filled dot against hollow ones.
-                            Icon(
-                                if (installed) Icons.Rounded.RadioButtonChecked
-                                else Icons.Rounded.RadioButtonUnchecked,
-                                contentDescription = null,
-                                tint =
-                                    when {
-                                        installed -> colors.primary
-                                        // Not filled and not the accent: this row is where the
-                                        // reader *appears* to be and is not.
-                                        diverged -> colors.tertiary
-                                        release.versionCode == selected?.versionCode ->
-                                            colors.onSurface
-                                        else -> colors.outline
-                                    },
-                            )
-                        },
-                        // A column of its own width, kept even when this row has nothing to say.
-                        // The status is one word on most rows and a whole clause on the divergent
-                        // one; sized to its content it would take the room the build's name needs
-                        // and wrap that row alone, and a slot that disappears when empty would
-                        // start each row's name in a different place. The label wraps inside its
-                        // column instead, where it costs nothing: three lines of it are still
-                        // shorter than the two the name and its date already occupy.
-                        trailingContent = {
-                            val label =
-                                when {
-                                    installed -> stringResource(R.string.update_installed)
-                                    diverged -> stringResource(R.string.update_same_number)
-                                    older -> stringResource(R.string.update_older)
-                                    else -> null
-                                }
-                            Box(
-                                modifier = Modifier.width(STATUS_WIDTH),
-                                contentAlignment = Alignment.CenterEnd,
-                            ) {
-                                if (label != null) {
-                                    Text(
-                                        label,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        textAlign = TextAlign.End,
-                                        color =
-                                            when {
-                                                installed -> colors.primary
-                                                diverged -> colors.tertiary
-                                                else -> colors.onSurfaceVariant
-                                            },
-                                    )
-                                }
-                            }
-                        },
-                        colors = sheetRowColors,
-                    ) {
-                        // One line each, always. What names the build is the same shape in every
-                        // row — "Vector v2.0 canary 3060", then its date and channel — and a row
-                        // that wraps because of what is beside it reads as a different kind of
-                        // entry when it is not.
-                        Text(release.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    }
+    val items =
+        history.map { release ->
+            val sameNumber = release.versionCode == update.installedVersionCode
+            // A build that carries this number but was not made from this release: another branch,
+            // or a working tree with changes in it.
+            val diverged = update.divergesFrom(release)
+            val status =
+                when {
+                    sameNumber && !diverged -> VersionStatus.Installed
+                    diverged -> VersionStatus.Diverged
+                    release.versionCode < update.installedVersionCode -> VersionStatus.Older
+                    else -> VersionStatus.None
                 }
-            }
+            VersionHistoryItem(
+                id = release.tag,
+                title = release.title,
+                subtitle =
+                    listOf(
+                            dateFormat.format(Date(release.epochSeconds * 1000)),
+                            if (release.isCanary) canaryLabel else releaseLabel,
+                        )
+                        .joinToString("  ·  "),
+                statusLabel =
+                    when (status) {
+                        VersionStatus.Installed -> installedLabel
+                        VersionStatus.Diverged -> sameNumberLabel
+                        VersionStatus.Older -> olderLabel
+                        VersionStatus.None -> null
+                    },
+                status = status,
+                selected = release.versionCode == selected?.versionCode,
+            )
         }
-    }
+
+    VersionHistorySheet(
+        heading = heading,
+        items = items,
+        onSelect = { id -> history.firstOrNull { it.tag == id }?.let(onSelect) },
+        onDismiss = onDismiss,
+    )
 }
