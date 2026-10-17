@@ -1,13 +1,8 @@
 name: Crowdin Action
 
+# Automatic triggers paused at the owner's request on 2026-10-17.
 on:
   workflow_dispatch:
-  push:
-    branches: [ master ]
-    paths:
-      - app/src/main/res/values/strings.xml
-      - daemon/src/main/res/values/strings.xml
-
 jobs:
   synchronize-with-crowdin:
     runs-on: ubuntu-latest
